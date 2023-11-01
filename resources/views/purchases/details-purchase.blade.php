@@ -37,10 +37,10 @@
                             <div class="form-control form-control-solid">{{ $purchase->supplier->name }}</div>
                         </div>
                         <!-- Form Group (supplier email) -->
-                        <div class="col-md-6">
-                            <label class="small mb-1">Email</label>
-                            <div class="form-control form-control-solid">{{ $purchase->supplier->email }}</div>
-                        </div>
+{{--                        <div class="col-md-6">--}}
+{{--                            <label class="small mb-1">Email</label>--}}
+{{--                            <div class="form-control form-control-solid">{{ $purchase->supplier->email }}</div>--}}
+{{--                        </div>--}}
                     </div>
                     <!-- Form Row -->
                     <div class="row gx-3 mb-3">
@@ -63,10 +63,10 @@
                             <div class="form-control form-control-solid">{{ $purchase->purchase_no }}</div>
                         </div>
                         <!-- Form Group (paid amount) -->
-                        <div class="col-md-6">
-                            <label class="small mb-1">Total</label>
-                            <div class="form-control form-control-solid">{{ $purchase->total_amount }}</div>
-                        </div>
+{{--                        <div class="col-md-6">--}}
+{{--                            <label class="small mb-1">Total</label>--}}
+{{--                            <div class="form-control form-control-solid">{{ $purchase->total_amount }}</div>--}}
+{{--                        </div>--}}
                     </div>
                     <!-- Form Row -->
                     <div class="row gx-3 mb-3">
@@ -83,8 +83,8 @@
                     </div>
                     <!-- Form Group (address) -->
                     <div class="mb-3">
-                        <label  class="small mb-1">Address</label>
-                        <div class="form-control form-control-solid">{{ $purchase->supplier->address }}</div>
+                        <label  class="small mb-1">Note</label>
+                        <div class="form-control form-control-solid">{{ $purchase->note }}</div>
                     </div>
 
                     @if ($purchase->purchase_status == 0)

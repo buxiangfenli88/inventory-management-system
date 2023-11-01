@@ -37,10 +37,10 @@
                             <div class="form-control form-control-solid">{{ $order->customer->name }}</div>
                         </div>
                         <!-- Form Group (customer email) -->
-                        <div class="col-md-6">
-                            <label class="small mb-1">Email</label>
-                            <div class="form-control form-control-solid">{{ $order->customer->email }}</div>
-                        </div>
+{{--                        <div class="col-md-6">--}}
+{{--                            <label class="small mb-1">Email</label>--}}
+{{--                            <div class="form-control form-control-solid">{{ $order->customer->email }}</div>--}}
+{{--                        </div>--}}
                     </div>
                     <!-- Form Row -->
                     <div class="row gx-3 mb-3">
@@ -102,8 +102,8 @@
 {{--                    </div>--}}
                     <!-- Form Group (address) -->
                     <div class="mb-3">
-                        <label  class="small mb-1">Address</label>
-                        <div class="form-control form-control-solid">{{ $order->customer->address }}</div>
+                        <label  class="small mb-1">Note</label>
+                        <div class="form-control form-control-solid">{{ $order->note }}</div>
                     </div>
 
                     @if ($order->order_status == 'pending')
