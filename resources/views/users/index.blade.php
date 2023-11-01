@@ -91,7 +91,8 @@
                                     <th scope="col">No.</th>
                                     <th scope="col">@sortablelink('name')</th>
                                     <th scope="col">@sortablelink('username')</th>
-                                    <th scope="col">@sortablelink('email')</th>
+{{--                                    <th scope="col">@sortablelink('email')</th>--}}
+                                    <th scope="col">Quyền</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -101,7 +102,8 @@
                                     <th scope="row">{{ (($users->currentPage() * (request('row') ? request('row') : 10)) - (request('row') ? request('row') : 10)) + $loop->iteration  }}</th>
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->username }}</td>
-                                    <td>{{ $user->email }}</td>
+{{--                                    <td>{{ $user->email }}</td>--}}
+                                    <td>{{ $user->roles->pluck('name')->implode(',') }}</td>
                                     <td>
                                         <div class="d-flex">
                                             <a href="{{ route('users.edit', $user->username) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-edit"></i></a>
