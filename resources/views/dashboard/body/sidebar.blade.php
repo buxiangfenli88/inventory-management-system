@@ -47,10 +47,10 @@
                 <div class="nav-link-icon"><i class="fa-solid fa-cash-register"></i></div>
                 All
             </a>
-            <a class="nav-link {{ Request::is('purchases/approved*') ? 'active' : '' }}" href="{{ route('purchases.approvedPurchases') }}">
-                <div class="nav-link-icon"><i class="fa-solid fa-circle-check"></i></div>
-                Approval
-            </a>
+{{--            <a class="nav-link {{ Request::is('purchases/approved*') ? 'active' : '' }}" href="{{ route('purchases.approvedPurchases') }}">--}}
+{{--                <div class="nav-link-icon"><i class="fa-solid fa-circle-check"></i></div>--}}
+{{--                Approval--}}
+{{--            </a>--}}
             <a class="nav-link {{ Request::is('purchases/report*') ? 'active' : '' }}" href="{{ route('purchases.dailyPurchaseReport') }}">
                 <div class="nav-link-icon"><i class="fa-solid fa-flag"></i></div>
                 Nhập Hàng Hàng Ngày

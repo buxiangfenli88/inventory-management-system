@@ -34,7 +34,7 @@
                             </div>
                             <div class="col-lg-6 col-sm-6">
                                 <div class="invoice">
-                                    <h1>Invoice # <span>123456</span></h1>
+                                    <h1>Invoice # <span></span></h1>
                                 </div>
                             </div>
                         </div>
@@ -45,7 +45,7 @@
                                 <div class="invoice-number">
                                     <h4 class="inv-title-1">Invoice date:</h4>
                                     <p class="invo-addr-1">
-                                        {{ Carbon\Carbon::now()->format('M d, Y') }}
+                                        {{ Carbon\Carbon::now()->timezone('GMT+7')->format('M d, Y') }}
                                     </p>
                                 </div>
                             </div>
@@ -55,15 +55,11 @@
                                 <h4 class="inv-title-1">Customer</h4>
                                 <p class="inv-from-1">{{ $customer->name }}</p>
                                 <p class="inv-from-1">{{ $customer->phone }}</p>
-                                <p class="inv-from-1">{{ $customer->email }}</p>
-                                <p class="inv-from-2">{{ $customer->address }}</p>
+                                <p class="inv-from-1"><strong>Ghi chú: </strong>{{ $note }}</p>
                             </div>
                             <div class="col-sm-6 text-end mb-50">
                                 <h4 class="inv-title-1">Store</h4>
-                                <p class="inv-from-1">Name Store</p>
-                                <p class="inv-from-1">(+62) 123 123 123</p>
-                                <p class="inv-from-1">email@example.com</p>
-                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>
+                                <p class="inv-from-1">TTC Bình Dương</p>
                             </div>
                         </div>
                     </div>
@@ -73,9 +69,9 @@
                                 <thead>
                                 <tr>
                                     <th>Item</th>
-                                    <th>Price</th>
+{{--                                    <th>Price</th>--}}
                                     <th>Quantity</th>
-                                    <th>Subtotal</th>
+{{--                                    <th>Subtotal</th>--}}
                                 </tr>
                                 </thead>
 
@@ -83,24 +79,24 @@
                                 @foreach ($carts as $item)
                                 <tr>
                                     <td>{{ $item->name }}</td>
-                                    <td>{{ $item->price }}</td>
+{{--                                    <td>{{ $item->price }}</td>--}}
                                     <td>{{ $item->qty }}</td>
-                                    <td>{{ $item->subtotal }}</td>
+{{--                                    <td>{{ $item->subtotal }}</td>--}}
                                 </tr>
                                 @endforeach
 
-                                <tr>
-                                    <td colspan="3"><strong>Subtotal</strong></td>
-                                    <td><strong>{{ Cart::subtotal() }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3"><strong>Tax</strong></td>
-                                    <td><strong>{{ Cart::tax() }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3"><strong>Total</strong></td>
-                                    <td><strong>{{ Cart::total() }}</strong></td>
-                                </tr>
+{{--                                <tr>--}}
+{{--                                    <td colspan="3"><strong>Subtotal</strong></td>--}}
+{{--                                    <td><strong>{{ Cart::subtotal() }}</strong></td>--}}
+{{--                                </tr>--}}
+{{--                                <tr>--}}
+{{--                                    <td colspan="3"><strong>Tax</strong></td>--}}
+{{--                                    <td><strong>{{ Cart::tax() }}</strong></td>--}}
+{{--                                </tr>--}}
+{{--                                <tr>--}}
+{{--                                    <td colspan="3"><strong>Total</strong></td>--}}
+{{--                                    <td><strong>{{ Cart::total() }}</strong></td>--}}
+{{--                                </tr>--}}
                                 </tbody>
                             </table>
                         </div>
@@ -147,6 +143,7 @@
                 <div class="modal-body">
                     <div class="modal-body">
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">
+                        <input type="hidden" name="note" value="{{ $note }}">
                         <div class="mb-3">
                             <!-- Form Group (type of product category) -->
                             <label class="small mb-1" for="payment_type">Payment <span class="text-danger">*</span></label>

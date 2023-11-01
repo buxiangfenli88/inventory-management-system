@@ -19,6 +19,7 @@ class Purchase extends Model
         'total_amount',
         'created_by',
         'updated_by',
+        'note',
     ];
 
     public $sortable = [

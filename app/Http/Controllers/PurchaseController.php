@@ -107,7 +107,8 @@ class PurchaseController extends Controller
         $rules = [
             'supplier_id' => 'required|string',
             'purchase_date' => 'required|string',
-            'total_amount' => 'required|numeric'
+            'total_amount' => 'required|numeric',
+            'note' => 'nullable|string'
         ];
 
         $purchase_no = IdGenerator::generate([
@@ -123,6 +124,7 @@ class PurchaseController extends Controller
         $validatedData['purchase_no'] = $purchase_no;
         $validatedData['created_by'] = auth()->user()->id;
         $validatedData['created_at'] = Carbon::now();
+        $validatedData['note'] = $validatedData['note'] ?? null;
 
         $purchase_id = Purchase::insertGetId($validatedData);
 

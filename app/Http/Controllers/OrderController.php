@@ -127,6 +127,7 @@ class OrderController extends Controller
             'customer_id' => 'required|numeric',
             'payment_type' => 'required|string',
             'pay' => 'required|numeric',
+            'note' => 'nullable|string'
         ];
 
         $invoice_no = IdGenerator::generate([
@@ -148,6 +149,7 @@ class OrderController extends Controller
         $validatedData['due'] = ((int)Cart::total() - (int)$validatedData['pay']);
         $validatedData['created_at'] = Carbon::now();
         $validatedData['created_by'] = auth()->user()->id;
+        $validatedData['note'] = $validatedData['note'] ?? null;
 
         $order_id = Order::insertGetId($validatedData);
 

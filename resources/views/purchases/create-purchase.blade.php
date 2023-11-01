@@ -66,6 +66,12 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="row gx-3 mb-3">
+                            <div class="col-md-12">
+                                <label class="small mb-1">Note</label>
+                                <textarea class="form-control form-control-solid" id="note" name="note" rows="2">{{ old('note') }}</textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- END: Purchase Details -->

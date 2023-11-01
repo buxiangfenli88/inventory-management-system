@@ -23,6 +23,7 @@ class Order extends Model
         'payment_type',
         'pay',
         'due',
+        'note',
     ];
 
     public $sortable = [

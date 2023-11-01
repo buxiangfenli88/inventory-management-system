@@ -111,6 +111,7 @@
 {{--                            <label class="small mb-1">Subtotal</label>--}}
 {{--                            <div class="form-control form-control-solid fw-bold text-red">{{ Cart::subtotal() }}</div>--}}
 {{--                        </div>--}}
+
                     </div>
                     <!-- Form Row -->
 {{--                    <div class="row gx-3 mb-3">--}}
@@ -129,6 +130,12 @@
 
                     <form action="{{ route('pos.createInvoice') }}" method="POST">
                         @csrf
+                        <div class="row gx-3 mb-3">
+                            <div class="col-md-10">
+                                <label class="small mb-1">Note</label>
+                                <textarea class="form-control form-control-solid" id="note" name="note" rows="2">{{ old('note') }}</textarea>
+                            </div>
+                        </div>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label class="small mb-1" for="customer_id">Customer <span class="text-danger">*</span></label>
