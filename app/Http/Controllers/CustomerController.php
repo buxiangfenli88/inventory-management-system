@@ -72,7 +72,9 @@ class CustomerController extends Controller
             $validatedData['photo'] = $fileName;
         }
 
-        Customer::create($validatedData);
+        $customer = Customer::create($validatedData);
+
+        return Redirect::route('customers.downloadCustomer', ['customer_id' => $customer->id]);
 
         return Redirect::route('customers.index')->with('success', 'New customer has been created!');
     }
@@ -157,5 +159,14 @@ class CustomerController extends Controller
         Customer::destroy($customer->id);
 
         return Redirect::route('customers.index')->with('success', 'Customer has been deleted!');
+    }
+
+    public function downloadCustomer(Int $customerId)
+    {
+        $customer = Customer::where('id', $customerId)->firstOrFail();
+
+        return view('customers.print-customer', [
+            'customer' => $customer,
+        ]);
     }
 }

@@ -2,15 +2,13 @@
 
 namespace App\Policies;
 
+use App\Enums\UserRole;
 use App\Models\User;
 
 class CustomerPolicy
 {
-    /**
-     * Create a new policy instance.
-     */
-    public function __construct()
+    public function update(User $user)
     {
-        //
+        return $user->hasAnyRole([UserRole::ADMIN]);
     }
 }

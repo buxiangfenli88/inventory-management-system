@@ -183,7 +183,7 @@
 {{--                        </div>--}}
 
                         <!-- Submit button -->
-                        <button class="btn btn-primary" type="submit">Add</button>
+                        <button class="btn btn-primary" type="submit">In</button>
                         <a class="btn btn-danger" href="{{ route('customers.index') }}">Cancel</a>
                     </div>
                 </div>

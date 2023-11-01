@@ -25,7 +25,8 @@ class Supplier extends Model
         'bien_so_xe',
         'category_id',
         'so_kien_giao',
-        'note'
+        'note',
+        'created_by'
     ];
 
     protected $guarded = [

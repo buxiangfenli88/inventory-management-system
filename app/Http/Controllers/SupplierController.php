@@ -84,11 +84,14 @@ class SupplierController extends Controller
              */
             $file->storeAs($path, $fileName);
             $validatedData['photo'] = $fileName;
+            $validatedData['created_by'] = auth()->user->id;
         }
 
-        Supplier::create($validatedData);
+        $supplier = Supplier::create($validatedData);
 
-        return Redirect::route('suppliers.index')->with('success', 'New supplier has been created!');
+        return Redirect::route('suppliers.downloadSupplier', ['supplier_id' => $supplier->id]);
+
+//        return Redirect::route('suppliers.index')->with('success', 'New supplier has been created!');
     }
 
     /**
@@ -172,5 +175,14 @@ class SupplierController extends Controller
         Supplier::destroy($supplier->id);
 
         return Redirect::route('suppliers.index')->with('success', 'Supplier has been deleted!');
+    }
+
+    public function downloadSupplier(Int $supplierId)
+    {
+        $supplier = Supplier::where('id', $supplierId)->firstOrFail();
+
+        return view('suppliers.print-supplier', [
+            'supplier' => $supplier,
+        ]);
     }
 }
