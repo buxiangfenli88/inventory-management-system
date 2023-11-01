@@ -127,7 +127,7 @@ class OrderController extends Controller
             'customer_id' => 'required|numeric',
             'payment_type' => 'required|string',
             'pay' => 'required|numeric',
-            'note' => 'nullable|string'
+            'note' => 'required|string'
         ];
 
         $invoice_no = IdGenerator::generate([

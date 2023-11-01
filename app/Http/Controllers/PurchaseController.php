@@ -108,7 +108,7 @@ class PurchaseController extends Controller
             'supplier_id' => 'required|string',
             'purchase_date' => 'required|string',
             'total_amount' => 'required|numeric',
-            'note' => 'nullable|string'
+            'note' => 'required|string'
         ];
 
         $purchase_no = IdGenerator::generate([

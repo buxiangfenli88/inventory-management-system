@@ -132,8 +132,13 @@
                         @csrf
                         <div class="row gx-3 mb-3">
                             <div class="col-md-10">
-                                <label class="small mb-1">Note</label>
-                                <textarea class="form-control form-control-solid" id="note" name="note" rows="2">{{ old('note') }}</textarea>
+                                <label class="small mb-1">Note <span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-solid @error('note') is-invalid @enderror" id="note" name="note" rows="2">{{ old('note') }}</textarea>
+                                @error('note')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
                             </div>
                         </div>
                         <div class="row mb-3">

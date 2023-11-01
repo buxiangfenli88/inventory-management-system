@@ -94,7 +94,7 @@ class PosController extends Controller
     {
         $rules = [
             'customer_id' => 'required|string',
-            'note' => 'nullable|string'
+            'note' => 'required|string'
         ];
 
         $validatedData = $request->validate($rules);
