@@ -74,7 +74,7 @@ class CustomerController extends Controller
 
         $customer = Customer::create($validatedData);
 
-        return Redirect::route('customers.downloadCustomer', ['customer_id' => $customer->id]);
+//        return Redirect::route('customers.downloadCustomer', ['customer_id' => $customer->id]);
 
         return Redirect::route('customers.index')->with('success', 'New customer has been created!');
     }

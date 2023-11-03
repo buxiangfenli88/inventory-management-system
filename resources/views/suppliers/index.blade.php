@@ -117,6 +117,7 @@
                                             </form>
                                                 <a target="_blank" href="https://translate.google.com/?sl=vi&tl=en&text={{ urlencode('Mời biển số xe '. $supplier->bien_so_xe . ($supplier->category ? ' của nhà cung cấp '.$supplier->category->name : '' ) .' vào kho') }}&op=translate" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-volume-up"></i></a>
                                             @endif
+                                            <a href="{{ route('suppliers.downloadSupplier', $supplier->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                         </div>
                                     </td>
                                 </tr>

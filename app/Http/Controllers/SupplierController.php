@@ -89,9 +89,9 @@ class SupplierController extends Controller
 
         $supplier = Supplier::create($validatedData);
 
-        return Redirect::route('suppliers.downloadSupplier', ['supplier_id' => $supplier->id]);
+//        return Redirect::route('suppliers.downloadSupplier', ['supplier_id' => $supplier->id]);
 
-//        return Redirect::route('suppliers.index')->with('success', 'New supplier has been created!');
+        return Redirect::route('suppliers.index')->with('success', 'New supplier has been created!');
     }
 
     /**

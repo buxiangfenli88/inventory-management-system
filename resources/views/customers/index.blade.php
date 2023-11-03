@@ -114,6 +114,7 @@
                                                 </button>
                                             </form>
                                             @endif
+                                            <a href="{{ route('customers.downloadCustomer', $customer->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                         </div>
                                     </td>
                                 </tr>
