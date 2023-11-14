@@ -113,6 +113,7 @@
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
                                             </form>
+                                                <a target="_blank" href="https://translate.google.com/?sl=vi&tl=en&text={{ urlencode('Mời biển số xe '. $customer->bien_so_xe .' vào kho') }}&op=translate" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-volume-up"></i></a>
                                             @endif
                                             <a href="{{ route('customers.downloadCustomer', $customer->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                         </div>
