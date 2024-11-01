@@ -4,13 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Kyslik\ColumnSortable\Sortable;
 
 class Supplier extends Model
 {
-    use HasFactory, Sortable, SoftDeletes;
-
+    use HasFactory, Sortable;
     protected $fillable = [
         'name',
         'email',
@@ -22,11 +20,6 @@ class Supplier extends Model
         'account_holder',
         'account_number',
         'bank_name',
-        'bien_so_xe',
-        'category_id',
-        'so_kien_giao',
-        'note',
-        'created_by'
     ];
 
     protected $guarded = [
@@ -37,22 +30,12 @@ class Supplier extends Model
         'name',
         'email',
         'shopname',
-        'bien_so_xe',
-        'created_at'
     ];
 
     public function scopeFilter($query, array $filters)
     {
         $query->when($filters['search'] ?? false, function ($query, $search) {
-            return $query->where('name', 'like', '%' . $search . '%')
-                ->orWhere('phone', 'like', '%' . $search . '%')
-                ->orWhere('bien_so_xe', 'like', '%' . $search . '%')
-                ;
+            return $query->where('name', 'like', '%' . $search . '%')->orWhere('shopname', 'like', '%' . $search . '%');
         });
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
     }
 }

@@ -74,7 +74,7 @@
                         </div>
                         <!-- Form Group (email address) -->
                         <div class="mb-3">
-                            <label class="small mb-1" for="email">Email address</label>
+                            <label class="small mb-1" for="email">Email address <span class="text-danger">*</span></label>
                             <input class="form-control form-control-solid @error('email') is-invalid @enderror" id="email" name="email" type="text" placeholder="" value="{{ old('email') }}" />
                             @error('email')
                             <div class="invalid-feedback">
@@ -109,22 +109,6 @@
                                 <label class="small mb-1" for="password_confirmation">Password confirmation</label>
                                 <input class="form-control form-control-solid @error('password_confirmation') is-invalid @enderror" id="password_confirmation" name="password_confirmation" type="password"/>
                                 @error('password_confirmation')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="col col-xl-6">
-                                <label class="small mb-1" for="username">Quyển<span class="text-danger">*</span></label>
-                                <select class="form-select form-control-solid @error('role_id') is-invalid @enderror" name="role_id">
-                                    @foreach (\Spatie\Permission\Models\Role::all() as $role)
-                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('role')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>

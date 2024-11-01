@@ -112,7 +112,6 @@
                                         <td>
                                             <div class="d-flex">
                                                 <a href="{{ route('purchases.purchaseDetails', $purchase->id) }}" class="btn btn-outline-success btn-sm mx-1"><i class="fa-solid fa-eye"></i></a>
-                                                <a href="{{ route('purchases.downloadPurchases', $purchase->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                             </div>
                                         </td>
                                     @else
@@ -122,7 +121,6 @@
                                         <td>
                                             <div class="d-flex">
                                                 <a href="{{ route('purchases.purchaseDetails', $purchase->id) }}" class="btn btn-outline-success btn-sm mx-1"><i class="fa-solid fa-eye"></i></a>
-                                                <a href="{{ route('purchases.downloadPurchases', $purchase->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                                 <form action="{{ route('purchases.deletePurchase', $purchase->id) }}" method="POST">
                                                     @csrf
                                                     @method('delete')

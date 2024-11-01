@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -47,15 +46,12 @@ class CustomerController extends Controller
         $rules = [
             'photo' => 'image|file|max:1024',
             'name' => 'required|string|max:50',
-            'email' => 'nullable|email|max:50|unique:customers,email',
-            'phone' => 'required|string|max:25',
+            'email' => 'required|email|max:50|unique:customers,email',
+            'phone' => 'required|string|max:25|unique:customers,phone',
             'account_holder' => 'max:50',
             'account_number' => 'max:25',
             'bank_name' => 'max:25',
-            'address' => 'nullable|string|max:100',
-            'bien_so_xe' => 'required|string|max:40',
-            'so_kien_giao' => 'nullable|integer',
-            'note' => 'nullable|string',
+            'address' => 'required|string|max:100',
         ];
 
         $validatedData = $request->validate($rules);
@@ -72,9 +68,7 @@ class CustomerController extends Controller
             $validatedData['photo'] = $fileName;
         }
 
-        $customer = Customer::create($validatedData);
-
-//        return Redirect::route('customers.downloadCustomer', ['customer_id' => $customer->id]);
+        Customer::create($validatedData);
 
         return Redirect::route('customers.index')->with('success', 'New customer has been created!');
     }
@@ -102,20 +96,15 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        $this->authorize('update', Customer::class);
-
         $rules = [
             'photo' => 'image|file|max:1024',
             'name' => 'required|string|max:50',
-            'email' => 'nullable|email|max:50|unique:customers,email,'.$customer->id,
-            'phone' => 'required|string|max:25',
+            'email' => 'required|email|max:50|unique:customers,email,'.$customer->id,
+            'phone' => 'required|string|max:25|unique:customers,phone,'.$customer->id,
             'account_holder' => 'max:50',
             'account_number' => 'max:25',
             'bank_name' => 'max:25',
-            'address' => 'nullable|string|max:100',
-            'bien_so_xe' => 'required|string|max:40',
-            'so_kien_giao' => 'nullable|integer',
-            'note' => 'nullable|string',
+            'address' => 'required|string|max:100',
         ];
 
         $validatedData = $request->validate($rules);
@@ -159,14 +148,5 @@ class CustomerController extends Controller
         Customer::destroy($customer->id);
 
         return Redirect::route('customers.index')->with('success', 'Customer has been deleted!');
-    }
-
-    public function downloadCustomer(Int $customerId)
-    {
-        $customer = Customer::where('id', $customerId)->firstOrFail();
-
-        return view('customers.print-customer', [
-            'customer' => $customer,
-        ]);
     }
 }

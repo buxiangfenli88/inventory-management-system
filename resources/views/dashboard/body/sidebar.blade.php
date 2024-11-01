@@ -2,10 +2,6 @@
 <nav class="sidenav shadow-right sidenav-light">
     <div class="sidenav-menu">
         <div class="nav accordion" id="accordionSidenav">
-            @if(auth()->user()->hasRole([
-                \App\Enums\UserRole::ADMIN,
-                \App\Enums\UserRole::STAFF
-            ]))
             <!-- Sidenav Menu Heading (Core)-->
             <div class="sidenav-menu-heading">Core</div>
             <a class="nav-link {{ Request::is('dashboard*') ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -16,12 +12,7 @@
                 <div class="nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
                 POS
             </a>
-            @endif
 
-            @if(auth()->user()->hasRole([
-                \App\Enums\UserRole::ADMIN,
-                \App\Enums\UserRole::STAFF
-            ]))
             <!-- Sidenav Heading (Orders)-->
             <div class="sidenav-menu-heading">Xuất Hàng</div>
             <a class="nav-link {{ Request::is('orders/complete*') ? 'active' : '' }}" href="{{ route('order.completeOrders') }}">
@@ -32,30 +23,24 @@
                 <div class="nav-link-icon"><i class="fa-solid fa-clock"></i></div>
                 Pending
             </a>
-            @endif
 {{--            <a class="nav-link {{ Request::is('orders/due*') ? 'active' : '' }}" href="{{ route('order.dueOrders') }}">--}}
 {{--                <div class="nav-link-icon"><i class="fa-solid fa-credit-card"></i></div>--}}
 {{--                Due--}}
 {{--            </a>--}}
-            @if(auth()->user()->hasRole([
-                \App\Enums\UserRole::ADMIN,
-                \App\Enums\UserRole::STAFF
-            ]))
             <!-- Sidenav Heading (Purchases)-->
             <div class="sidenav-menu-heading">Nhập Hàng</div>
             <a class="nav-link {{ Request::is('purchases', 'purchase/create*', 'purchases/details*') ? 'active' : '' }}" href="{{ route('purchases.allPurchases') }}">
                 <div class="nav-link-icon"><i class="fa-solid fa-cash-register"></i></div>
                 All
             </a>
-{{--            <a class="nav-link {{ Request::is('purchases/approved*') ? 'active' : '' }}" href="{{ route('purchases.approvedPurchases') }}">--}}
-{{--                <div class="nav-link-icon"><i class="fa-solid fa-circle-check"></i></div>--}}
-{{--                Approval--}}
-{{--            </a>--}}
+            <a class="nav-link {{ Request::is('purchases/approved*') ? 'active' : '' }}" href="{{ route('purchases.approvedPurchases') }}">
+                <div class="nav-link-icon"><i class="fa-solid fa-circle-check"></i></div>
+                Approval
+            </a>
             <a class="nav-link {{ Request::is('purchases/report*') ? 'active' : '' }}" href="{{ route('purchases.dailyPurchaseReport') }}">
                 <div class="nav-link-icon"><i class="fa-solid fa-flag"></i></div>
                 Nhập Hàng Hàng Ngày
             </a>
-            @endif
 
             <!-- Sidenav Accordion (Pages)-->
             {{-- <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
@@ -91,10 +76,6 @@
                 Người Giao
             </a>
 
-            @if(auth()->user()->hasRole([
-                \App\Enums\UserRole::ADMIN,
-                \App\Enums\UserRole::STAFF
-            ]))
             <!-- Sidenav Heading (Products)-->
             <div class="sidenav-menu-heading">Products</div>
             <a class="nav-link {{ Request::is('products*') ? 'active' : '' }}" href="{{ route('products.index') }}">
@@ -105,7 +86,6 @@
                 <div class="nav-link-icon"><i class="fa-solid fa-folder"></i></div>
                 Danh Mục
             </a>
-            @endif
 {{--            <a class="nav-link {{ Request::is('units*') ? 'active' : '' }}" href="{{ route('units.index') }}">--}}
 {{--                <div class="nav-link-icon"><i class="fa-solid fa-folder"></i></div>--}}
 {{--                Units--}}

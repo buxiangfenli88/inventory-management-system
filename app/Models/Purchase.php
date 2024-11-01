@@ -19,7 +19,6 @@ class Purchase extends Model
         'total_amount',
         'created_by',
         'updated_by',
-        'note',
     ];
 
     public $sortable = [
@@ -38,7 +37,7 @@ class Purchase extends Model
 
     public function supplier()
     {
-        return $this->belongsTo(Supplier::class, 'supplier_id', 'id')->withTrashed();
+        return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
 
     public function user_created()

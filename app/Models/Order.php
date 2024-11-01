@@ -23,7 +23,6 @@ class Order extends Model
         'payment_type',
         'pay',
         'due',
-        'note',
     ];
 
     public $sortable = [
@@ -44,7 +43,7 @@ class Order extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'customer_id', 'id')->withTrashed();
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 
     public function user_created()

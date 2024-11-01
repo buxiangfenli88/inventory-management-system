@@ -50,7 +50,7 @@
                                 <div class="invoice-number">
                                     <h4 class="inv-title-1">Invoice date:</h4>
                                     <p class="invo-addr-1">
-                                        {{ \Carbon\Carbon::now()->setTimezone('GMT+7')->format('d-m-Y') }}
+                                        {{ \Carbon\Carbon::now()->setTimezone('GMT+7') }}
                                     </p>
                                 </div>
                             </div>
@@ -60,15 +60,15 @@
                                 <h4 class="inv-title-1">Customer</h4>
                                 <p class="inv-from-1">{{ $order->customer->name }}</p>
                                 <p class="inv-from-1">{{ $order->customer->phone }}</p>
-{{--                                <p class="inv-from-1">{{ $order->customer->email }}</p>--}}
-                                <p class="inv-from-2"><strong>Ghi chú: </strong>{{ $order->note }}</p>
+                                <p class="inv-from-1">{{ $order->customer->email }}</p>
+                                <p class="inv-from-2">{{ $order->customer->address }}</p>
                             </div>
                             <div class="col-sm-6 text-end mb-50">
                                 <h4 class="inv-title-1">Store</h4>
                                 <p class="inv-from-1">TTC Bình Dương</p>
-{{--                                <p class="inv-from-1">(+62) 123 123 123</p>--}}
-{{--                                <p class="inv-from-1">email@example.com</p>--}}
-{{--                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>--}}
+                                <p class="inv-from-1">(+62) 123 123 123</p>
+                                <p class="inv-from-1">email@example.com</p>
+                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>
                             </div>
                         </div>
                     </div>
@@ -78,9 +78,9 @@
                                 <thead>
                                 <tr>
                                     <th>Item</th>
-{{--                                    <th>Price</th>--}}
+                                    <th>Price</th>
                                     <th>Quantity</th>
-{{--                                    <th>Subtotal</th>--}}
+                                    <th>Subtotal</th>
                                 </tr>
                                 </thead>
 
@@ -88,30 +88,30 @@
                                 @foreach ($orderDetails as $item)
                                 <tr>
                                     <td>{{ $item->product->product_name }}</td>
-{{--                                    <td>{{ $item->unitcost }}</td>--}}
+                                    <td>{{ $item->unitcost }}</td>
                                     <td>{{ $item->quantity }}</td>
-{{--                                    <td>{{ $item->total }}</td>--}}
+                                    <td>{{ $item->total }}</td>
                                 </tr>
                                 @endforeach
 
-{{--                                <tr>--}}
-{{--                                    <td><strong>Subtotal</strong></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td><strong>{{ $order->sub_total }}</strong></td>--}}
-{{--                                </tr>--}}
-{{--                                <tr>--}}
-{{--                                    <td><strong>Tax</strong></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td><strong>{{ $order->vat }}</strong></td>--}}
-{{--                                </tr>--}}
-{{--                                <tr>--}}
-{{--                                    <td><strong>Total</strong></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td><strong>{{ $order->total }}</strong></td>--}}
-{{--                                </tr>--}}
+                                <tr>
+                                    <td><strong>Subtotal</strong></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{ $order->sub_total }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tax</strong></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{ $order->vat }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{ $order->total }}</strong></td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>

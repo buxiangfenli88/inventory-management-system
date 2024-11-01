@@ -113,7 +113,6 @@
                                     <td>
                                         <div class="d-flex">
                                             <a href="{{ route('order.orderPendingDetails', $order->id) }}" class="btn btn-outline-success btn-sm mx-1"><i class="fa-solid fa-eye"></i></a>
-                                            <a href="{{ route('order.downloadInvoice', $order->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                         </div>
                                     </td>
                                 </tr>

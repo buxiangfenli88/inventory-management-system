@@ -93,8 +93,7 @@ class PosController extends Controller
     public function createInvoice(Request $request)
     {
         $rules = [
-            'customer_id' => 'required|string',
-            'note' => 'required|string'
+            'customer_id' => 'required|string'
         ];
 
         $validatedData = $request->validate($rules);
@@ -103,8 +102,7 @@ class PosController extends Controller
 
         return view('pos.create', [
             'customer' => $customer,
-            'carts' => $carts,
-            'note' => $validatedData['note'] ?? '',
+            'carts' => $carts
         ]);
     }
 }

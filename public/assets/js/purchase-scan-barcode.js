@@ -1,4 +1,7 @@
 function onScanSuccess(decodedText, decodedResult) {
+    // handle the scanned code as you like, for example:
+    console.log(`Code matched = ${decodedText}`, decodedResult);
+
     $.ajax({
         url: "/products/find-by-code?product_code=" + decodedText,
         type: "GET",
@@ -16,14 +19,19 @@ function onScanSuccess(decodedText, decodedResult) {
 }
 
 function onScanFailure(error) {
-    // alert(`Error ${error}`);
+    alert(`Error ${error}`);
 }
 
 let html5QrcodeScanner = new Html5QrcodeScanner(
     "scanner",
     {
         fps: 10,
-        qrbox: {width: 250, height: 250}
-    }
+        qrbox: {width: 50, height: 50}
+    },
+    false
 );
 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+$(function () {
+
+});

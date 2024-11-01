@@ -60,15 +60,15 @@
                                 <h4 class="inv-title-1">Customer</h4>
                                 <p class="inv-from-1">{{ $purchase->supplier->name }}</p>
                                 <p class="inv-from-1">{{ $purchase->supplier->phone }}</p>
-{{--                                <p class="inv-from-1"><strong>Biển số xe:</strong> {{ $purchase->supplier->bien_so_xe }}</p>--}}
-                                <p class="inv-from-2"><strong>Ghi chú:</strong> {{ $purchase->note }}</p>
+                                <p class="inv-from-1">{{ $purchase->supplier->email }}</p>
+                                <p class="inv-from-2">{{ $purchase->supplier->address }}</p>
                             </div>
                             <div class="col-sm-6 text-end mb-50">
                                 <h4 class="inv-title-1">Store</h4>
                                 <p class="inv-from-1">TTC Bình Dương</p>
-{{--                                <p class="inv-from-1">(+62) 123 123 123</p>--}}
-{{--                                <p class="inv-from-1">email@example.com</p>--}}
-{{--                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>--}}
+                                <p class="inv-from-1">(+62) 123 123 123</p>
+                                <p class="inv-from-1">email@example.com</p>
+                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>
                             </div>
                         </div>
                     </div>
@@ -78,7 +78,9 @@
                                 <thead>
                                 <tr>
                                     <th>Item</th>
+                                    <th>Price</th>
                                     <th>Quantity</th>
+                                    <th>Subtotal</th>
                                 </tr>
                                 </thead>
 
@@ -86,28 +88,30 @@
                                 @foreach ($purchaseDetails as $item)
                                 <tr>
                                     <td>{{ $item->product->product_name }}</td>
+                                    <td>{{ $item->unitcost }}</td>
                                     <td>{{ $item->quantity }}</td>
+                                    <td>{{ $item->total }}</td>
                                 </tr>
                                 @endforeach
 
-{{--                                <tr>--}}
-{{--                                    <td><strong>Subtotal</strong></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td><strong>{{ $purchase->sub_total }}</strong></td>--}}
-{{--                                </tr>--}}
-{{--                                <tr>--}}
-{{--                                    <td><strong>Tax</strong></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td><strong>{{ $purchase->vat }}</strong></td>--}}
-{{--                                </tr>--}}
-{{--                                <tr>--}}
-{{--                                    <td><strong>Total</strong></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td></td>--}}
-{{--                                    <td><strong>{{ $purchase->total }}</strong></td>--}}
-{{--                                </tr>--}}
+                                <tr>
+                                    <td><strong>Subtotal</strong></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{ $purchase->sub_total }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tax</strong></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{ $purchase->vat }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><strong>{{ $purchase->total }}</strong></td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>

@@ -75,7 +75,7 @@
                         </div>
                         <!-- Form Group (email address) -->
                         <div class="mb-3">
-                            <label class="small mb-1" for="email">Email address</label>
+                            <label class="small mb-1" for="email">Email address <span class="text-danger">*</span></label>
                             <input class="form-control form-control-solid @error('email') is-invalid @enderror" id="email" name="email" type="text" placeholder="" value="{{ old('email', $user->email) }}" />
                             @error('email')
                             <div class="invalid-feedback">

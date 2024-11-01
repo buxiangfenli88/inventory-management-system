@@ -2,7 +2,7 @@
 
 @section('specificpagescripts')
 <script src="{{ asset('assets/js/img-preview.js') }}"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="{{ asset('assets/js/pos-scan-barcode.js') }}"></script>
 @endsection
 
@@ -111,7 +111,6 @@
 {{--                            <label class="small mb-1">Subtotal</label>--}}
 {{--                            <div class="form-control form-control-solid fw-bold text-red">{{ Cart::subtotal() }}</div>--}}
 {{--                        </div>--}}
-
                     </div>
                     <!-- Form Row -->
 {{--                    <div class="row gx-3 mb-3">--}}
@@ -130,17 +129,6 @@
 
                     <form action="{{ route('pos.createInvoice') }}" method="POST">
                         @csrf
-                        <div class="row gx-3 mb-3">
-                            <div class="col-md-10">
-                                <label class="small mb-1">Note <span class="text-danger">*</span></label>
-                                <textarea class="form-control form-control-solid @error('note') is-invalid @enderror" id="note" name="note" rows="2">{{ old('note') }}</textarea>
-                                @error('note')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <label class="small mb-1" for="customer_id">Customer <span class="text-danger">*</span></label>

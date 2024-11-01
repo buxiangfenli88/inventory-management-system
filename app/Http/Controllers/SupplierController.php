@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserRole;
 use App\Models\Supplier;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
@@ -22,17 +20,9 @@ class SupplierController extends Controller
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
         }
 
-        $query = Supplier::query();
-
-        $startData = Carbon::now()->setTimezone('+7')->startOfDay();
-        $endData = $startData->clone()->endOfDay();
-
-        if (auth()->user()->hasRole(UserRole::GUARD)) {
-            $query->whereBetween('created_at', [$startData->utc(), $endData->utc()]);
-        }
-
-        $suppliers = $query->filter(request(['search']))
-            ->sortable()->paginate($row)
+        $suppliers = Supplier::filter(request(['search']))
+            ->sortable()
+            ->paginate($row)
             ->appends(request()->query());
 
         return view('suppliers.index', [
@@ -56,18 +46,14 @@ class SupplierController extends Controller
         $rules = [
             'photo' => 'image|file|max:1024',
             'name' => 'required|string|max:50',
-            'email' => 'nullable|email|max:50|unique:suppliers,email',
-            'phone' => 'required|string|max:25',
-            'shopname' => 'nullable|string|max:50',
-            'type' => 'nullable|string|max:25',
+            'email' => 'required|email|max:50|unique:suppliers,email',
+            'phone' => 'required|string|max:25|unique:suppliers,phone',
+            'shopname' => 'required|string|max:50',
+            'type' => 'required|string|max:25',
             'account_holder' => 'max:50',
             'account_number' => 'max:25',
             'bank_name' => 'max:25',
-            'address' => 'nullable|string|max:100',
-            'category_id' => 'required|exists:categories,id',
-            'bien_so_xe' => 'required|string|max:40',
-            'so_kien_giao' => 'nullable|integer',
-            'note' => 'nullable|string',
+            'address' => 'required|string|max:100',
         ];
 
         $validatedData = $request->validate($rules);
@@ -84,12 +70,9 @@ class SupplierController extends Controller
              */
             $file->storeAs($path, $fileName);
             $validatedData['photo'] = $fileName;
-            $validatedData['created_by'] = auth()->user->id;
         }
 
-        $supplier = Supplier::create($validatedData);
-
-//        return Redirect::route('suppliers.downloadSupplier', ['supplier_id' => $supplier->id]);
+        Supplier::create($validatedData);
 
         return Redirect::route('suppliers.index')->with('success', 'New supplier has been created!');
     }
@@ -120,18 +103,14 @@ class SupplierController extends Controller
         $rules = [
             'photo' => 'image|file|max:1024',
             'name' => 'required|string|max:50',
-            'email' => 'nullable|email|max:50|unique:suppliers,email,'.$supplier->id,
-            'phone' => 'required|string|max:25',
-            'shopname' => 'nullable|string|max:50',
-            'type' => 'nullable|string|max:25',
+            'email' => 'required|email|max:50|unique:suppliers,email,'.$supplier->id,
+            'phone' => 'required|string|max:25|unique:suppliers,phone,'.$supplier->id,
+            'shopname' => 'required|string|max:50',
+            'type' => 'required|string|max:25',
             'account_holder' => 'max:50',
             'account_number' => 'max:25',
             'bank_name' => 'max:25',
-            'address' => 'nullable|string|max:100',
-            'category_id' => 'required|exists:categories,id',
-            'bien_so_xe' => 'required|string|max:40',
-            'so_kien_giao' => 'nullable|integer',
-            'note' => 'nullable|string',
+            'address' => 'required|string|max:100',
         ];
 
         $validatedData = $request->validate($rules);
@@ -175,14 +154,5 @@ class SupplierController extends Controller
         Supplier::destroy($supplier->id);
 
         return Redirect::route('suppliers.index')->with('success', 'Supplier has been deleted!');
-    }
-
-    public function downloadSupplier(Int $supplierId)
-    {
-        $supplier = Supplier::where('id', $supplierId)->firstOrFail();
-
-        return view('suppliers.print-supplier', [
-            'supplier' => $supplier,
-        ]);
     }
 }

@@ -56,21 +56,10 @@
                                 <select class="form-select form-control-solid @error('supplier_id') is-invalid @enderror" id="supplier_id" name="supplier_id" required>
                                     <option selected="" disabled="">Select a supplier:</option>
                                     @foreach ($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}" @if(old('supplier_id') == $supplier->id) selected="selected" @endif>{{ $supplier->bien_so_xe }} {{ $supplier->category ? ' - '.$supplier->category->name:'' }}</option>
+                                    <option value="{{ $supplier->id }}" @if(old('supplier_id') == $supplier->id) selected="selected" @endif>{{ $supplier->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('supplier_id')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="row gx-3 mb-3">
-                            <div class="col-md-12">
-                                <label class="small mb-1">Note <span class="text-danger">*</span></label>
-                                <textarea class="form-control form-control-solid @error('note') is-invalid @enderror" id="note" name="note" rows="2" required>{{ old('note') }}</textarea>
-                                @error('note')
                                 <div class="invalid-feedback">
                                     {{ $message }}
                                 </div>
@@ -163,7 +152,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{{ asset('assets/js/handlebars.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js" ></script>
-<script src="https://unpkg.com/html5-qrcode@2.0.9/dist/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="{{ asset('assets/js/purchase-scan-barcode.js') }}"></script>
 
 <script id="document-template" type="text/x-handlebars-template">

@@ -90,8 +90,8 @@
                                 <tr>
                                     <th scope="col">No.</th>
                                     <th scope="col">@sortablelink('name')</th>
-                                    <th scope="col">@sortablelink('bien_so_xe', 'Biển Số Xe')</th>
-                                    <th scope="col">@sortablelink('created_at','Giờ xuất kho')</th>
+                                    <th scope="col">@sortablelink('email')</th>
+                                    <th scope="col">Phone</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -100,11 +100,10 @@
                                 <tr>
                                     <th scope="row">{{ (($customers->currentPage() * (request('row') ? request('row') : 10)) - (request('row') ? request('row') : 10)) + $loop->iteration  }}</th>
                                     <td>{{ $customer->name }}</td>
-                                    <td>{{ $customer->bien_so_xe }}</td>
-                                    <td>{{ $customer->created_at->timezone('+7')->format('d-m-Y H:i') }}</td>
+                                    <td>{{ $customer->email }}</td>
+                                    <td>{{ $customer->phone }}</td>
                                     <td>
                                         <div class="d-flex">
-                                            @if(auth()->user()->hasAnyRole([\App\Enums\UserRole::ADMIN, \App\Enums\UserRole::STAFF]))
                                             <a href="{{ route('customers.edit', $customer->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-edit"></i></a>
                                             <form action="{{ route('customers.destroy', $customer->id) }}" method="POST">
                                                 @method('delete')
@@ -113,9 +112,6 @@
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
                                             </form>
-                                                <a target="_blank" href="https://translate.google.com/?sl=vi&tl=en&text={{ urlencode('Mời biển số xe '. $customer->bien_so_xe .' vào kho') }}&op=translate" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-volume-up"></i></a>
-                                            @endif
-                                            <a href="{{ route('customers.downloadCustomer', $customer->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                         </div>
                                     </td>
                                 </tr>

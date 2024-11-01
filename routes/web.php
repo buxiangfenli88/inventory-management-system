@@ -26,20 +26,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-
-    if(auth()->user()){
-        return redirect('dashboard');
-    }
-
     return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
-    if (auth()->user()->hasRole([UserRole::GUARD])) {
-        return redirect('/customers');
-    }
-
-    return redirect('/pos');
+    return view('dashboard.index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -49,9 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('/customers', CustomerController::class);
-    Route::get('/customers/{customer_id}/download', [CustomerController::class, 'downloadCustomer'])->name('customers.downloadCustomer');
     Route::resource('/suppliers', SupplierController::class);
-    Route::get('/suppliers/{supplier_id}/download', [SupplierController::class, 'downloadSupplier'])->name('suppliers.downloadSupplier');
     Route::resource('/categories', CategoryController::class);
     Route::resource('/units', UnitController::class);
 

@@ -10,5 +10,4 @@ final class UserRole extends Enum
 {
     const ADMIN = 'Admin';
     const STAFF = 'Staff';
-    const GUARD = 'Guard';
 }

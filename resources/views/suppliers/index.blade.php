@@ -90,9 +90,9 @@
                                 <tr>
                                     <th scope="col">No.</th>
                                     <th scope="col">@sortablelink('name')</th>
-                                    <th scope="col">@sortablelink('bien_so_xe', 'Biển Số Xe')</th>
-                                    <th scope="col">Nhà cung cấp</th>
-                                    <th scope="col">@sortablelink('created_at','Giờ vào kho')</th>
+                                    <th scope="col">@sortablelink('email')</th>
+                                    <th scope="col">@sortablelink('shopname')</th>
+                                    <th scope="col">Phone</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -101,12 +101,11 @@
                                 <tr>
                                     <th scope="row">{{ (($suppliers->currentPage() * (request('row') ? request('row') : 10)) - (request('row') ? request('row') : 10)) + $loop->iteration  }}</th>
                                     <td>{{ $supplier->name }}</td>
-                                    <td>{{ $supplier->bien_so_xe }}</td>
-                                    <td>{{ $supplier->category ? $supplier->category->name : '' }}</td>
-                                    <td>{{ $supplier->created_at->timezone('+7')->format('d-m-Y H:i') }}</td>
+                                    <td>{{ $supplier->email }}</td>
+                                    <td>{{ $supplier->shopname }}</td>
+                                    <td>{{ $supplier->phone }}</td>
                                     <td>
                                         <div class="d-flex">
-                                            @if(auth()->user()->hasAnyRole([\App\Enums\UserRole::ADMIN, \App\Enums\UserRole::STAFF]))
                                             <a href="{{ route('suppliers.edit', $supplier->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-edit"></i></a>
                                             <form action="{{ route('suppliers.destroy', $supplier->id) }}" method="POST">
                                                 @method('delete')
@@ -115,9 +114,6 @@
                                                     <i class="far fa-trash-alt"></i>
                                                 </button>
                                             </form>
-                                                <a target="_blank" href="https://translate.google.com/?sl=vi&tl=en&text={{ urlencode('Mời biển số xe '. $supplier->bien_so_xe . ($supplier->category ? ' của nhà cung cấp '.$supplier->category->name : '' ) .' vào kho') }}&op=translate" class="btn btn-outline-primary btn-sm mx-1"><i class="fas fa-volume-up"></i></a>
-                                            @endif
-                                            <a href="{{ route('suppliers.downloadSupplier', $supplier->id) }}" class="btn btn-outline-primary btn-sm mx-1"><i class="fa-solid fa-print"></i></a>
                                         </div>
                                     </td>
                                 </tr>

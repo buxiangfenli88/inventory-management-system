@@ -48,7 +48,7 @@ class UserController extends Controller
         $rules = [
             'photo' => 'image|file|max:1024',
             'name' => 'required|max:50',
-            'email' => 'nullable|email|max:50|unique:users,email',
+            'email' => 'required|email|max:50|unique:users,email',
             'username' => 'required|min:4|max:25|alpha_dash:ascii|unique:users,username',
             'password' => 'required_with:password_confirmation|min:6',
             'password_confirmation' => 'same:password|min:6',
@@ -56,11 +56,6 @@ class UserController extends Controller
 
         $validatedData = $request->validate($rules);
         $validatedData['password'] = Hash::make($request->password);
-
-        $roleRules = [
-            'role_id' => 'required|int|exists:roles,id'
-        ];
-        $validatedRoleData = $request->validate($roleRules);
 
         /**
          * Handle upload an image
@@ -76,9 +71,7 @@ class UserController extends Controller
             $validatedData['photo'] = $fileName;
         }
 
-        $user = User::create($validatedData);
-
-        $user->syncRoles(Role::findById($validatedRoleData['role_id']));
+        User::create($validatedData);
 
         return Redirect::route('users.index')->with('success', 'New User has been created!');
     }
@@ -109,7 +102,7 @@ class UserController extends Controller
         $rules = [
             'name' => 'required|max:50',
             'photo' => 'image|file|max:1024',
-            'email' => 'nullable|email|max:50|unique:users,email,'.$user->id,
+            'email' => 'required|email|max:50|unique:users,email,'.$user->id,
             'username' => 'required|min:4|max:25|alpha_dash:ascii|unique:users,username,'.$user->id,
         ];
 
