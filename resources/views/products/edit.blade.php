@@ -72,6 +72,27 @@
                             </div>
                             @enderror
                         </div>
+
+                        <!-- Form Row -->
+                        <div class="row gx-3 mb-3">
+                            <!-- Form Group (type of product category) -->
+                            <div class="col-md-6">
+                                <label class="small mb-1" for="category_id">Product category <span class="text-danger">*</span></label>
+                                <select class="form-select form-control-solid @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
+                                    <option selected="" disabled="">Select a category:</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" @if(old('category_id', $product->category_id) == $category->id) selected="selected" @endif>{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('category_id')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                        <!-- Form Row -->
+
                         <!-- Form Group (product name) -->
                         <div class="mb-3">
                             <label class="small mb-1" for="product_name">Product name <span class="text-danger">*</span></label>
@@ -82,40 +103,7 @@
                             </div>
                             @enderror
                         </div>
-                        <!-- Form Row -->
-                        <div class="row gx-3 mb-3">
-                            <!-- Form Group (type of product category) -->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="category_id">Product category <span class="text-danger">*</span></label>
-                                <select class="form-select form-control-solid @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
-                                    <option selected="" disabled="">Select a category:</option>
-                                    @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @if(old('category_id', $product->category_id) == $category->id) selected="selected" @endif>{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('category_id')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                            <!-- Form Group (type of product unit) -->
-{{--                            <div class="col-md-6">--}}
-{{--                                <label class="small mb-1" for="unit_id">Unit <span class="text-danger">*</span></label>--}}
-{{--                                <select class="form-select form-control-solid @error('unit_id') is-invalid @enderror" id="unit_id" name="unit_id">--}}
-{{--                                    <option selected="" disabled="">Select a unit:</option>--}}
-{{--                                    @foreach ($units as $unit)--}}
-{{--                                    <option value="{{ $unit->id }}" @if(old('unit_id', $product->unit_id) == $unit->id) selected="selected" @endif>{{ $unit->name }}</option>--}}
-{{--                                    @endforeach--}}
-{{--                                </select>--}}
-{{--                                @error('unit_id')--}}
-{{--                                <div class="invalid-feedback">--}}
-{{--                                    {{ $message }}--}}
-{{--                                </div>--}}
-{{--                                @enderror--}}
-{{--                            </div>--}}
-                        </div>
-                        <!-- Form Row -->
+
 {{--                        <div class="row gx-3 mb-3">--}}
 {{--                            <!-- Form Group (buying price) -->--}}
 {{--                            <div class="col-md-6">--}}
@@ -148,6 +136,26 @@
                             </div>
                             @enderror
                         </div>
+
+                        <!-- Form Row -->
+                        <div class="row gx-3 mb-3">
+                            <!-- Form Group (type of product category) -->
+                            <div class="col-md-6">
+                                <label class="small mb-1" for="storage_location_id">Vị trí<span class="text-danger">*</span></label>
+                                <select class="form-select form-control-solid @error('storage_location_id') is-invalid @enderror" id="storage_location_id" name="storage_location_id">
+                                    <option selected="" disabled="">Chọn danh mục:</option>
+                                    @foreach ($storageLocations as $storageLocation)
+                                        <option value="{{ $storageLocation->id }}" @if((old('storage_location_id') ?? $product->storage_location_id) == $storageLocation->id) selected="selected" @endif>{{ $storageLocation->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('storage_location_id')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                        <!-- Form Row -->
 
                         <!-- Submit button -->
                         <button class="btn btn-primary" type="submit">Update</button>

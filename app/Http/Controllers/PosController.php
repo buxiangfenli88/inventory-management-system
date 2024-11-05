@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrderDetails;
 use App\Models\Product;
 use App\Models\Customer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\ValidationException;
 
 class PosController extends Controller
 {
@@ -89,6 +94,7 @@ class PosController extends Controller
 
     /**
      * Handle create an invoice.
+     * @throws ValidationException
      */
     public function createInvoice(Request $request)
     {
@@ -98,11 +104,19 @@ class PosController extends Controller
 
         $validatedData = $request->validate($rules);
         $customer = Customer::where('id', $validatedData['customer_id'])->first();
-        $carts = Cart::content();
+
+        $contents = Cart::content();
+
+        foreach ($contents as $content) {
+            $product = Product::findOrFail($content->id);
+            if ($content->qty > $product->stock) {
+                throw ValidationException::withMessages(['invalidStock' => $product->product_name . ' vượt quá số lượng khả dụng'])->redirectTo(Redirect::back()->getTargetUrl());
+            }
+        }
 
         return view('pos.create', [
             'customer' => $customer,
-            'carts' => $carts
+            'carts' => $contents
         ]);
     }
 }

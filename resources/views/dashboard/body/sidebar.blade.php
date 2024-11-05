@@ -91,6 +91,13 @@
 {{--                Units--}}
 {{--            </a>--}}
 
+            <!-- Sidenav Heading (Products)-->
+            <div class="sidenav-menu-heading">Vị trí</div>
+            <a class="nav-link {{ Request::is('storage-location*') ? 'active' : '' }}" href="{{ route('storage-locations.index') }}">
+                <div class="nav-link-icon"><i class="fa-solid fa-location"></i></div>
+                Vị trí
+            </a>
+
             <!-- Sidenav Heading (Settings)-->
             @if(auth()->user()->hasRole('Admin'))
                 <div class="sidenav-menu-heading">Settings</div>
@@ -98,8 +105,8 @@
                     <div class="nav-link-icon"><i class="fa-solid fa-users"></i></div>
                     Users
                 </a>
-                </div>
            @endif
+        </div>
     </div>
 
     <!-- Sidenav Footer-->

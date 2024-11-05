@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -138,36 +140,44 @@ class OrderController extends Controller
 
         $validatedData = $request->validate($rules);
 
-        $validatedData['order_date'] = Carbon::now()->format('Y-m-d');
-        $validatedData['order_status'] = 'pending';
-        $validatedData['total_products'] = Cart::count();
-        $validatedData['sub_total'] = Cart::subtotal();
-        $validatedData['vat'] = Cart::tax();
-        $validatedData['invoice_no'] = $invoice_no;
-        $validatedData['total'] = Cart::total();
-        $validatedData['due'] = ((int)Cart::total() - (int)$validatedData['pay']);
-        $validatedData['created_at'] = Carbon::now();
-        $validatedData['created_by'] = auth()->user()->id;
+        DB::transaction(function () use ($validatedData, $invoice_no) {
+            $validatedData['order_date'] = Carbon::now()->format('Y-m-d');
+            $validatedData['order_status'] = 'pending';
+            $validatedData['total_products'] = Cart::count();
+            $validatedData['sub_total'] = Cart::subtotal();
+            $validatedData['vat'] = Cart::tax();
+            $validatedData['invoice_no'] = $invoice_no;
+            $validatedData['total'] = Cart::total();
+            $validatedData['due'] = ((int)Cart::total() - (int)$validatedData['pay']);
+            $validatedData['created_at'] = Carbon::now();
+            $validatedData['created_by'] = auth()->user()->id;
 
-        $order_id = Order::insertGetId($validatedData);
+            $order_id = Order::insertGetId($validatedData);
 
-        // Create Order Details
-        $contents = Cart::content();
-        $oDetails = array();
+            // Create Order Details
+            $contents = Cart::content();
+            $oDetails = array();
 
-        foreach ($contents as $content) {
-            $oDetails['order_id'] = $order_id;
-            $oDetails['product_id'] = $content->id;
-            $oDetails['quantity'] = $content->qty;
-            $oDetails['unitcost'] = $content->price;
-            $oDetails['total'] = $content->subtotal;
-            $oDetails['created_at'] = Carbon::now();
+            foreach ($contents as $content) {
+                $product = Product::findOrFail($content->id);
+                if ($content->qty > $product->stock) {
+                    throw ValidationException::withMessages(['invalidStock' => $product->product_name . ' vượt quá số lượng khả dụng'])
+                        ->redirectTo(route('pos.index'));
+                }
 
-            OrderDetails::insert($oDetails);
-        }
+                $oDetails['order_id'] = $order_id;
+                $oDetails['product_id'] = $content->id;
+                $oDetails['quantity'] = $content->qty;
+                $oDetails['unitcost'] = $content->price;
+                $oDetails['total'] = $content->subtotal;
+                $oDetails['created_at'] = Carbon::now();
 
-        // Delete Cart Sopping History
-        Cart::destroy();
+                OrderDetails::insert($oDetails);
+            }
+
+            // Delete Cart Sopping History
+            Cart::destroy();
+        });
 
         return Redirect::route('order.pendingOrders')->with('success', 'Order has been created!');
     }

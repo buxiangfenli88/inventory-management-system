@@ -23,6 +23,11 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
+                @error('invalidStock')
+                <div class="text-danger">
+                    {{ $message }}
+                </div>
+                @enderror
                 <!-- BEGIN: Invoice Details -->
                 <div class="invoice-inner-9" id="invoice_wrapper">
                     <div class="invoice-top">

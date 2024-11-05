@@ -9,6 +9,7 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\StorageLocationController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('/customers', CustomerController::class);
     Route::resource('/suppliers', SupplierController::class);
     Route::resource('/categories', CategoryController::class);
+    Route::resource('/storage-locations', StorageLocationController::class);
     Route::resource('/units', UnitController::class);
 
     // Route Products

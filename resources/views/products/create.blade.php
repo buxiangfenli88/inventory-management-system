@@ -59,23 +59,13 @@
                 <!-- BEGIN: Product Details -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        Product Details
+                        Chi tiết sản phẩm
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="small mb-1" for="product_code">Product code</label>
+                            <label class="small mb-1" for="product_code">Mã sản phẩm</label>
                             <input class="form-control form-control-solid @error('product_code') is-invalid @enderror" id="product_name" name="product_code" type="text" placeholder="" value="{{ old('product_code') }}" autocomplete="off"/>
                             @error('product_code')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                            @enderror
-                        </div>
-                        <!-- Form Group (product name) -->
-                        <div class="mb-3">
-                            <label class="small mb-1" for="product_name">Product name <span class="text-danger">*</span></label>
-                            <input class="form-control form-control-solid @error('product_name') is-invalid @enderror" id="product_name" name="product_name" type="text" placeholder="" value="{{ old('product_name') }}" autocomplete="off"/>
-                            @error('product_name')
                             <div class="invalid-feedback">
                                 {{ $message }}
                             </div>
@@ -85,11 +75,11 @@
                         <div class="row gx-3 mb-3">
                             <!-- Form Group (type of product category) -->
                             <div class="col-md-6">
-                                <label class="small mb-1" for="category_id">Product category <span class="text-danger">*</span></label>
+                                <label class="small mb-1" for="category_id">Danh mục sản phẩm<span class="text-danger">*</span></label>
                                 <select class="form-select form-control-solid @error('category_id') is-invalid @enderror" id="category_id" name="category_id">
-                                    <option selected="" disabled="">Select a category:</option>
+                                    <option selected="" disabled="">Chọn danh mục:</option>
                                     @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @if(old('category_id') == $category->id) selected="selected" @endif>{{ $category->name }}</option>
+                                        <option value="{{ $category->id }}" @if(old('category_id') == $category->id) selected="selected" @endif>{{ $category->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('category_id')
@@ -98,23 +88,18 @@
                                 </div>
                                 @enderror
                             </div>
-                            <!-- Form Group (type of product unit) -->
-{{--                            <div class="col-md-6">--}}
-{{--                                <label class="small mb-1" for="unit_id">Unit <span class="text-danger">*</span></label>--}}
-{{--                                <select class="form-select form-control-solid @error('unit_id') is-invalid @enderror" id="unit_id" name="unit_id">--}}
-{{--                                    <option selected="" disabled="">Select a unit:</option>--}}
-{{--                                    @foreach ($units as $unit)--}}
-{{--                                    <option value="{{ $unit->id }}" @if(old('unit_id') == $unit->id) selected="selected" @endif>{{ $unit->name }}</option>--}}
-{{--                                    @endforeach--}}
-{{--                                </select>--}}
-{{--                                @error('unit_id')--}}
-{{--                                <div class="invalid-feedback">--}}
-{{--                                    {{ $message }}--}}
-{{--                                </div>--}}
-{{--                                @enderror--}}
-{{--                            </div>--}}
                         </div>
                         <!-- Form Row -->
+                        <!-- Form Group (product name) -->
+                        <div class="mb-3">
+                            <label class="small mb-1" for="product_name">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input class="form-control form-control-solid @error('product_name') is-invalid @enderror" id="product_name" name="product_name" type="text" placeholder="" value="{{ old('product_name') }}" autocomplete="off"/>
+                            @error('product_name')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                            @enderror
+                        </div>
 {{--                        <div class="row gx-3 mb-3">--}}
 {{--                            <!-- Form Group (buying price) -->--}}
 {{--                            <div class="col-md-6">--}}
@@ -139,7 +124,7 @@
 {{--                        </div>--}}
                         <!-- Form Group (stock) -->
                         <div class="mb-3">
-                            <label class="small mb-1" for="stock">Stock <span class="text-danger">*</span></label>
+                            <label class="small mb-1" for="stock">Số lượng <span class="text-danger">*</span></label>
                             <input class="form-control form-control-solid @error('stock') is-invalid @enderror" id="stock" name="stock" type="text" placeholder="" value="{{ old('stock') }}" autocomplete="off" />
                             @error('stock')
                             <div class="invalid-feedback">
@@ -147,6 +132,26 @@
                             </div>
                             @enderror
                         </div>
+
+                        <!-- Form Row -->
+                        <div class="row gx-3 mb-3">
+                            <!-- Form Group (type of product category) -->
+                            <div class="col-md-6">
+                                <label class="small mb-1" for="storage_location_id">Vị trí<span class="text-danger">*</span></label>
+                                <select class="form-select form-control-solid @error('storage_location_id') is-invalid @enderror" id="storage_location_id" name="storage_location_id">
+                                    <option selected="" disabled="">Chọn danh mục:</option>
+                                    @foreach ($storageLocations as $storageLocation)
+                                        <option value="{{ $storageLocation->id }}" @if(old('storage_location_id') == $storageLocation->id) selected="selected" @endif>{{ $storageLocation->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('storage_location_id')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div>
+                        </div>
+                        <!-- Form Row -->
 
                         <!-- Submit button -->
                         <button class="btn btn-primary" type="submit">Save</button>

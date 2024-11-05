@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StorageLocation;
 use Exception;
 use App\Models\Unit;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Redirect;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
@@ -22,17 +25,17 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
         if ($row < 1 || $row > 100) {
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
         }
 
         $products = Product::with(['category', 'unit'])
-                ->filter(request(['search']))
-                ->sortable()
-                ->paginate($row)
-                ->appends(request()->query());
+            ->filter(request(['search']))
+            ->sortable()
+            ->paginate($row)
+            ->appends(request()->query());
 
         return view('products.index', [
             'products' => $products,
@@ -59,20 +62,22 @@ class ProductController extends Controller
     {
         return view('products.create', [
             'categories' => Category::all(),
+            'storageLocations' => StorageLocation::query()->where('stock_remain', '>', 0)->get(),
             'units' => Unit::all(),
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
+     * @throws ValidationException
      */
     public function store(Request $request)
     {
-        $product_code = IdGenerator::generate([
+        $productCode = IdGenerator::generate([
             'table' => 'products',
             'field' => 'product_code',
             'length' => 6,
-            'prefix' => 'P'
+            'prefix' => 'P',
         ]);
 
         $rules = [
@@ -81,21 +86,28 @@ class ProductController extends Controller
             'product_code' => 'nullable|string|max:255',
             'category_id' => 'required|integer',
             'unit_id' => 'nullable|integer',
-            'stock' => 'required|integer',
+            'stock' => 'required|integer|min:0',
             'buying_price' => 'nullable|integer',
             'selling_price' => 'nullable|integer',
+            'storage_location_id' => 'required|integer|exists:storage_locations,id',
         ];
 
         $validatedData = $request->validate($rules);
 
         // Save product code value
-        $validatedData['product_code'] = $validatedData['product_code'] ?? $product_code;
+        $validatedData['product_code'] = $validatedData['product_code'] ?? $productCode;
+
+        $storageLocation = StorageLocation::query()->where('id', $validatedData['storage_location_id'])->first();
+        $remain = $storageLocation->getStockRemain();
+        if ((int)$validatedData['stock'] > $remain) {
+            throw ValidationException::withMessages(['stock' => 'Số lượng vượt quá số lượng khả dụng ' . $remain]);
+        }
 
         /**
          * Handle upload image
          */
         if ($file = $request->file('product_image')) {
-            $fileName = hexdec(uniqid()).'.'.$file->getClientOriginalExtension();
+            $fileName = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
             $path = 'public/products/';
 
             /**
@@ -105,7 +117,11 @@ class ProductController extends Controller
             $validatedData['product_image'] = $fileName;
         }
 
-        Product::create($validatedData);
+        DB::transaction(function () use ($validatedData, $storageLocation) {
+            Product::create($validatedData);
+            $storageLocation->stock_remain = $storageLocation->getStockRemain();
+            $storageLocation->save();
+        });
 
         return Redirect::route('products.index')->with('success', 'Product has been created!');
     }
@@ -134,12 +150,19 @@ class ProductController extends Controller
         return view('products.edit', [
             'categories' => Category::all(),
             'units' => Unit::all(),
-            'product' => $product
+            'storageLocations' => StorageLocation::query()
+                ->where(function ($query) use ($product) {
+                    $query->where('stock_remain', '>', 0);
+                    $query->orWhere('id', $product->storage_location_id);
+                })
+                ->get(),
+            'product' => $product,
         ]);
     }
 
     /**
      * Update the specified resource in storage.
+     * @throws ValidationException
      */
     public function update(Request $request, Product $product)
     {
@@ -149,9 +172,10 @@ class ProductController extends Controller
             'product_code' => 'required|string|max:255',
             'category_id' => 'required|integer',
             'unit_id' => 'nullable|integer',
-            'stock' => 'required|integer',
+            'stock' => 'required|integer|min:0',
             'buying_price' => 'nullable|integer',
             'selling_price' => 'nullable|integer',
+            'storage_location_id' => 'required|integer|exists:storage_locations,id',
         ];
 
         $validatedData = $request->validate($rules);
@@ -160,13 +184,13 @@ class ProductController extends Controller
          * Handle upload an image
          */
         if ($file = $request->file('product_image')) {
-            $fileName = hexdec(uniqid()).'.'.$file->getClientOriginalExtension();
+            $fileName = hexdec(uniqid()) . '.' . $file->getClientOriginalExtension();
             $path = 'public/products/';
 
             /**
              * Delete photo if exists.
              */
-            if($product->product_image){
+            if ($product->product_image) {
                 Storage::delete($path . $product->product_image);
             }
 
@@ -177,7 +201,24 @@ class ProductController extends Controller
             $validatedData['product_image'] = $fileName;
         }
 
-        Product::where('id', $product->id)->update($validatedData);
+        $storageLocation = StorageLocation::query()->where('id', $validatedData['storage_location_id'])->first();
+        $remain = $storageLocation->getStockRemain($product->id);
+        if ((int)$validatedData['stock'] > $remain) {
+            throw ValidationException::withMessages(['stock' => 'Số lượng vượt quá số lượng khả dụng ' . $remain]);
+        }
+
+        DB::transaction(function () use ($product, $validatedData, $storageLocation) {
+            Product::where('id', $product->id)->update($validatedData);
+            // restore old location
+            /* @var StorageLocation $oldStorageLocation */
+            if ((int)$validatedData['storage_location_id'] !== $product->storage_location_id && $oldStorageLocation = StorageLocation::find($product->storage_location_id)) {
+                $oldStorageLocation->stock_remain = $oldStorageLocation->getStockRemain();
+                $oldStorageLocation->save();
+            }
+
+            $storageLocation->stock_remain = $storageLocation->getStockRemain();
+            $storageLocation->save();
+        });
 
         return Redirect::route('products.index')->with('success', 'Product has been updated!');
     }
@@ -190,7 +231,7 @@ class ProductController extends Controller
         /**
          * Delete photo if exists.
          */
-        if($product->product_image){
+        if ($product->product_image) {
             Storage::delete('public/products/' . $product->product_image);
         }
 
@@ -215,25 +256,25 @@ class ProductController extends Controller
 
         $the_file = $request->file('file');
 
-        try{
+        try {
             $spreadsheet = IOFactory::load($the_file->getRealPath());
-            $sheet        = $spreadsheet->getActiveSheet();
-            $row_limit    = $sheet->getHighestDataRow();
+            $sheet = $spreadsheet->getActiveSheet();
+            $row_limit = $sheet->getHighestDataRow();
             $column_limit = $sheet->getHighestDataColumn();
-            $row_range    = range( 2, $row_limit );
-            $column_range = range( 'J', $column_limit );
+            $row_range = range(2, $row_limit);
+            $column_range = range('J', $column_limit);
             $startcount = 2;
             $data = array();
-            foreach ( $row_range as $row ) {
+            foreach ($row_range as $row) {
                 $data[] = [
-                    'product_name' => $sheet->getCell( 'A' . $row )->getValue(),
-                    'category_id' => $sheet->getCell( 'B' . $row )->getValue(),
-                    'unit_id' => $sheet->getCell( 'C' . $row )->getValue(),
-                    'product_code' => $sheet->getCell( 'D' . $row )->getValue(),
-                    'stock' => $sheet->getCell( 'E' . $row )->getValue(),
-                    'buying_price' => $sheet->getCell( 'F' . $row )->getValue(),
-                    'selling_price' =>$sheet->getCell( 'G' . $row )->getValue(),
-                    'product_image' =>$sheet->getCell( 'H' . $row )->getValue(),
+                    'product_name' => $sheet->getCell('A' . $row)->getValue(),
+                    'category_id' => $sheet->getCell('B' . $row)->getValue(),
+                    'unit_id' => $sheet->getCell('C' . $row)->getValue(),
+                    'product_code' => $sheet->getCell('D' . $row)->getValue(),
+                    'stock' => $sheet->getCell('E' . $row)->getValue(),
+                    'buying_price' => $sheet->getCell('F' . $row)->getValue(),
+                    'selling_price' => $sheet->getCell('G' . $row)->getValue(),
+                    'product_image' => $sheet->getCell('H' . $row)->getValue(),
                 ];
                 $startcount++;
             }
@@ -250,7 +291,8 @@ class ProductController extends Controller
     /**
      * Handle export data products.
      */
-    function export(){
+    function export()
+    {
         $products = Product::all()->sortBy('product_name');
 
         $product_array [] = array(
@@ -264,16 +306,15 @@ class ProductController extends Controller
             'Product Image',
         );
 
-        foreach($products as $product)
-        {
+        foreach ($products as $product) {
             $product_array[] = array(
                 'Product Name' => $product->product_name,
                 'Category Id' => $product->category_id,
                 'Unit Id' => $product->unit_id,
                 'Product Code' => $product->product_code,
                 'Stock' => $product->stock,
-                'Buying Price' =>$product->buying_price,
-                'Selling Price' =>$product->selling_price,
+                'Buying Price' => $product->buying_price,
+                'Selling Price' => $product->selling_price,
                 'Product Image' => $product->product_image,
             );
         }
@@ -285,7 +326,8 @@ class ProductController extends Controller
      *This function loads the customer data from the database then converts it
      * into an Array that will be exported to Excel
      */
-    public function exportExcel($products){
+    public function exportExcel($products)
+    {
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '4000M');
 
