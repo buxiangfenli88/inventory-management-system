@@ -42,6 +42,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static Builder|Product whereStorageLocationId($value)
  * @method static Builder|Product whereUnitId($value)
  * @method static Builder|Product whereUpdatedAt($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StorageLocation> $storageLocations
+ * @property-read int|null $storage_locations_count
  * @mixin \Eloquent
  */
 class Product extends Model
@@ -76,12 +78,17 @@ class Product extends Model
 
     protected $with = [
         'category',
-        'unit'
+        'unit',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function storageLocations()
+    {
+        return $this->hasMany(StorageLocation::class, 'product_id');
     }
 
     public function unit()

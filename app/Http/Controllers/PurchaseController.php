@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ProductStorageLocation;
+use App\Models\StorageLocation;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Product;
@@ -13,6 +15,7 @@ use App\Models\PurcaseDetail;
 use App\Models\PurchaseDetails;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
@@ -25,7 +28,7 @@ class PurchaseController extends Controller
      */
     public function allPurchases()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
         if ($row < 1 || $row > 100) {
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
@@ -39,7 +42,7 @@ class PurchaseController extends Controller
             ->appends(request()->query());
 
         return view('purchases.purchases', [
-            'purchases' => $purchases
+            'purchases' => $purchases,
         ]);
     }
 
@@ -48,7 +51,7 @@ class PurchaseController extends Controller
      */
     public function approvedPurchases()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
         if ($row < 1 || $row > 100) {
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
@@ -63,16 +66,16 @@ class PurchaseController extends Controller
             ->appends(request()->query());
 
         return view('purchases.approved-purchases', [
-            'purchases' => $purchases
+            'purchases' => $purchases,
         ]);
     }
 
     /**
      * Display a purchase details.
      */
-    public function purchaseDetails(String $purchase_id)
+    public function purchaseDetails(string $purchase_id)
     {
-        $purchase = Purchase::with(['supplier','user_created','user_updated'])
+        $purchase = Purchase::with(['supplier', 'user_created', 'user_updated'])
             ->roleFilter(auth()->user())
             ->where('id', $purchase_id)
             ->firstOrFail();
@@ -96,25 +99,27 @@ class PurchaseController extends Controller
         return view('purchases.create-purchase', [
             'categories' => Category::all(),
             'suppliers' => Supplier::all(),
+            'storageLocations' => StorageLocation::query()->where('stock_remain', '>', 0)->get(),
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
+     * @throws ValidationException
      */
     public function storePurchase(Request $request)
     {
         $rules = [
             'supplier_id' => 'required|string',
             'purchase_date' => 'required|string',
-            'total_amount' => 'required|numeric'
+            'total_amount' => 'required|numeric',
         ];
 
         $purchase_no = IdGenerator::generate([
             'table' => 'purchases',
             'field' => 'purchase_no',
             'length' => 10,
-            'prefix' => 'PRS-'
+            'prefix' => 'PRS-',
         ]);
 
         $validatedData = $request->validate($rules);
@@ -124,20 +129,47 @@ class PurchaseController extends Controller
         $validatedData['created_by'] = auth()->user()->id;
         $validatedData['created_at'] = Carbon::now();
 
-        $purchase_id = Purchase::insertGetId($validatedData);
+        try {
+            DB::transaction(function () use ($validatedData, $request) {
+                $purchase_id = Purchase::insertGetId($validatedData);
 
-        // Create Purchase Details
-        $pDetails = array();
-        $products = count($request->product_id);
-        for ($i=0; $i < $products; $i++) {
-            $pDetails['purchase_id'] = $purchase_id;
-            $pDetails['product_id'] = $request->product_id[$i];
-            $pDetails['quantity'] = $request->quantity[$i];
-            $pDetails['unitcost'] = $request->unitcost[$i];
-            $pDetails['total'] = $request->total[$i];
-            $pDetails['created_at'] = Carbon::now();
+                // Create Purchase Details
+                $pDetails = array();
+                $products = count($request->product_id);
 
-            PurchaseDetails::insert($pDetails);
+                for ($i = 0; $i < $products; $i++) {
+                    $pDetails['purchase_id'] = $purchase_id;
+                    $pDetails['product_id'] = $request->product_id[$i];
+                    $pDetails['quantity'] = $request->quantity[$i];
+                    $pDetails['unitcost'] = $request->unitcost[$i];
+                    $pDetails['total'] = $request->total[$i];
+                    $pDetails['storage_location_id'] = $request->storage_location_id[$i];
+                    $pDetails['created_at'] = Carbon::now();
+
+                    /* @var StorageLocation $storageLocation */
+                    $storageLocation = StorageLocation::findOrFail($request->storage_location_id[$i]);
+
+                    if ((int)$pDetails['quantity'] > $storageLocation->stock_remain) {
+                        throw ValidationException::withMessages(['errorMessage' => $storageLocation->name . ' không đủ só lượng chứa hàng']);
+                    }
+
+                    // update stock remain
+                    $storageLocation->stock_remain -= $pDetails['quantity'];
+                    $storageLocation->save();
+
+                    // update or create product location quantity
+                    $productLocation = ProductStorageLocation::query()->firstOrCreate([
+                        'storage_location_id' => $storageLocation->id,
+                        'product_id' => $pDetails['product_id'],
+                    ]);
+                    $productLocation->quantity += $pDetails['quantity'];
+                    $productLocation->save();
+
+                    PurchaseDetails::insert($pDetails);
+                }
+            });
+        } catch (ValidationException $e) {
+            return Redirect::back()->withInput($request->all())->withErrors($e->errors());
         }
 
         return Redirect::route('purchases.allPurchases')->with('success', 'Purchase has been created!');
@@ -155,13 +187,13 @@ class PurchaseController extends Controller
 
         foreach ($products as $product) {
             Product::where('id', $product->product_id)
-                    ->update(['stock' => DB::raw('stock+'.$product->quantity)]);
+                ->update(['stock' => DB::raw('stock+' . $product->quantity)]);
         }
 
         Purchase::findOrFail($purchase_id)
             ->update([
                 'purchase_status' => 1,
-                'updated_by' => auth()->user()->id
+                'updated_by' => auth()->user()->id,
             ]); // 1 = approved, 0 = pending
 
         return Redirect::route('purchases.allPurchases')->with('success', 'Purchase has been approved!');
@@ -170,11 +202,11 @@ class PurchaseController extends Controller
     /**
      * Handle delete a purchase
      */
-    public function deletePurchase(String $purchase_id)
+    public function deletePurchase(string $purchase_id)
     {
         Purchase::where([
             'id' => $purchase_id,
-            'purchase_status' => '0'
+            'purchase_status' => '0',
         ])->delete();
 
         PurchaseDetails::where('purchase_id', $purchase_id)->delete();
@@ -187,7 +219,7 @@ class PurchaseController extends Controller
      */
     public function dailyPurchaseReport()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
         if ($row < 1 || $row > 100) {
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
@@ -202,7 +234,7 @@ class PurchaseController extends Controller
             ->appends(request()->query());
 
         return view('purchases.purchases', [
-            'purchases' => $purchases
+            'purchases' => $purchases,
         ]);
     }
 
@@ -238,9 +270,9 @@ class PurchaseController extends Controller
         $purchases = DB::table('purchase_details')
             ->join('products', 'purchase_details.product_id', '=', 'products.id')
             ->join('purchases', 'purchase_details.purchase_id', '=', 'purchases.id')
-            ->whereBetween('purchases.purchase_date',[$sDate,$eDate])
-            ->where('purchases.purchase_status','1')
-            ->select( 'purchases.purchase_no', 'purchases.purchase_date', 'purchases.supplier_id','products.product_code', 'products.product_name', 'purchase_details.quantity', 'purchase_details.unitcost', 'purchase_details.total')
+            ->whereBetween('purchases.purchase_date', [$sDate, $eDate])
+            ->where('purchases.purchase_status', '1')
+            ->select('purchases.purchase_no', 'purchases.purchase_date', 'purchases.supplier_id', 'products.product_code', 'products.product_name', 'purchase_details.quantity', 'purchase_details.unitcost', 'purchase_details.total')
             ->get();
 
 
@@ -255,8 +287,7 @@ class PurchaseController extends Controller
 //            'Total',
         );
 
-        foreach($purchases as $purchase)
-        {
+        foreach ($purchases as $purchase) {
             $purchase_array[] = array(
                 'Date' => $purchase->purchase_date,
                 'No Purchase' => $purchase->purchase_no,
@@ -276,7 +307,8 @@ class PurchaseController extends Controller
      *This function loads the customer data from the database then converts it
      * into an Array that will be exported to Excel
      */
-    public function exportExcel($products){
+    public function exportExcel($products)
+    {
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '4000M');
 
@@ -296,7 +328,7 @@ class PurchaseController extends Controller
         }
     }
 
-    public function downloadPurchases(Int $purchase_id)
+    public function downloadPurchases(int $purchase_id)
     {
         $purchase = Purchase::with('supplier')->where('id', $purchase_id)->first();
         $purchaseDetails = PurchaseDetails::with('product')

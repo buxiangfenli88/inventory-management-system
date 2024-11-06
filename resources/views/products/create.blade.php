@@ -134,23 +134,23 @@
                         </div>
 
                         <!-- Form Row -->
-                        <div class="row gx-3 mb-3">
-                            <!-- Form Group (type of product category) -->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="storage_location_id">Vị trí<span class="text-danger">*</span></label>
-                                <select class="form-select form-control-solid @error('storage_location_id') is-invalid @enderror" id="storage_location_id" name="storage_location_id">
-                                    <option selected="" disabled="">Chọn danh mục:</option>
-                                    @foreach ($storageLocations as $storageLocation)
-                                        <option value="{{ $storageLocation->id }}" @if(old('storage_location_id') == $storageLocation->id) selected="selected" @endif>{{ $storageLocation->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('storage_location_id')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                                @enderror
-                            </div>
-                        </div>
+{{--                        <div class="row gx-3 mb-3">--}}
+{{--                            <!-- Form Group (type of product category) -->--}}
+{{--                            <div class="col-md-6">--}}
+{{--                                <label class="small mb-1" for="storage_location_id">Vị trí<span class="text-danger">*</span></label>--}}
+{{--                                <select class="form-select form-control-solid @error('storage_location_id') is-invalid @enderror" id="storage_location_id" name="storage_location_id">--}}
+{{--                                    <option selected="" disabled="">Chọn danh mục:</option>--}}
+{{--                                    @foreach ($storageLocations as $storageLocation)--}}
+{{--                                        <option value="{{ $storageLocation->id }}" @if(old('storage_location_id') == $storageLocation->id) selected="selected" @endif>{{ $storageLocation->name }}</option>--}}
+{{--                                    @endforeach--}}
+{{--                                </select>--}}
+{{--                                @error('storage_location_id')--}}
+{{--                                <div class="invalid-feedback">--}}
+{{--                                    {{ $message }}--}}
+{{--                                </div>--}}
+{{--                                @enderror--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
                         <!-- Form Row -->
 
                         <!-- Submit button -->

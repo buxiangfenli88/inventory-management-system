@@ -45,6 +45,7 @@ class StorageLocationController extends Controller
         $rules = [
             'name' => 'required|unique:categories,name',
             'stock' => 'required|numeric|min:0',
+            'stock_remain' => 'required|numeric|min:0|lte:stock',
         ];
 
         $validatedData = $request->validate($rules);
@@ -80,6 +81,7 @@ class StorageLocationController extends Controller
         $rules = [
             'name' => 'required|unique:categories,name,' . $storageLocation->id,
             'stock' => 'required|numeric|min:0',
+            'stock_remain' => 'required|numeric|min:0|lte:stock',
         ];
 
         $validatedData = $request->validate($rules);

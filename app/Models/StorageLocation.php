@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Kyslik\ColumnSortable\Sortable;
@@ -33,6 +35,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static Builder|StorageLocation whereUpdatedAt($value)
  * @method static Builder|StorageLocation withTrashed()
  * @method static Builder|StorageLocation withoutTrashed()
+ * @property-read Collection<int, Product> $products
+ * @property-read int|null $products_count
+ * @method static Builder|StorageLocation whereStockRemain($value)
  * @mixin \Eloquent
  */
 class StorageLocation extends Model
@@ -42,16 +47,23 @@ class StorageLocation extends Model
     protected $fillable = [
         'name',
         'stock',
+        'stock_remain',
     ];
 
     protected $sortable = [
         'name',
         'stock',
+        'stock_remain'
     ];
 
     protected $guarded = [
         'id',
     ];
+
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class, 'storage_location_id');
+    }
 
     public function scopeFilter($query, array $filters)
     {

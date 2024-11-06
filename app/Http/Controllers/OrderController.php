@@ -36,7 +36,7 @@ class OrderController extends Controller
             ->appends(request()->query());
 
         return view('orders.pending-orders', [
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 
@@ -82,7 +82,7 @@ class OrderController extends Controller
             ->appends(request()->query());
 
         return view('orders.due-orders', [
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 
@@ -135,7 +135,7 @@ class OrderController extends Controller
             'table' => 'orders',
             'field' => 'invoice_no',
             'length' => 10,
-            'prefix' => 'INV-'
+            'prefix' => 'INV-',
         ]);
 
         $validatedData = $request->validate($rules);
@@ -209,7 +209,7 @@ class OrderController extends Controller
     {
         $rules = [
             'id' => 'required|numeric',
-            'pay' => 'required|numeric'
+            'pay' => 'required|numeric',
         ];
 
         $validatedData = $request->validate($rules);
@@ -223,7 +223,7 @@ class OrderController extends Controller
 
         Order::findOrFail($validatedData['id'])->update([
             'due' => $paidDue,
-            'pay' => $paidPay
+            'pay' => $paidPay,
         ]);
 
         return Redirect::route('order.dueOrders')->with('success', 'Due amount has been updated!');
@@ -244,5 +244,62 @@ class OrderController extends Controller
             'order' => $order,
             'orderDetails' => $orderDetails,
         ]);
+    }
+
+    public function getOrderReport()
+    {
+        return view('orders.report-order');
+    }
+
+    public function exportPurchaseReport(Request $request)
+    {
+        $user = $request->user();
+
+        $rules = [
+            'start_date' => 'required|string|date_format:Y-m-d',
+            'end_date' => 'required|string|date_format:Y-m-d',
+        ];
+
+        $validatedData = $request->validate($rules);
+
+        $sDate = $validatedData['start_date'];
+        $eDate = $validatedData['end_date'];
+
+        $purchases = $orders = Order::query()
+            ->where('order_status', 'complete')
+            ->roleFilter($user)
+            ->whereBetween('orders.order_date',[$sDate,$eDate])
+            ->filter(request(['search']))
+            ->sortable()
+            ->appends(request()->query())
+            ->get();
+
+
+        $purchase_array [] = array(
+            'Date',
+            'No Purchase',
+            'Supplier',
+            'Product Code',
+            'Product',
+            'Quantity',
+//            'Unitcost',
+//            'Total',
+        );
+
+        foreach($purchases as $purchase)
+        {
+            $purchase_array[] = array(
+                'Date' => $purchase->purchase_date,
+                'No Purchase' => $purchase->purchase_no,
+                'Supplier' => $purchase->supplier_id,
+                'Product Code' => $purchase->product_code,
+                'Product' => $purchase->product_name,
+                'Quantity' => $purchase->quantity,
+//                'Unitcost' => $purchase->unitcost,
+//                'Total' => $purchase->total,
+            );
+        }
+
+        $this->exportExcel($purchase_array);
     }
 }

@@ -264,7 +264,7 @@
                                             </div>
                                             </td> --}}
                                             <td>{{ $product->product_name }}</td>
-                                            <td>{{ $product->stock }}</td>
+                                            <td>{{ $product->stock_available }}</td>
                                             {{--                                        <td>{{ $product->unit->name }}</td>--}}
                                             {{--                                        <td>{{ $product->selling_price }}</td>--}}
                                             <td>

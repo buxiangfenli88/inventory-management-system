@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\PurchaseDetails
@@ -14,21 +16,23 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $quantity
  * @property int $unitcost
  * @property int $total
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Product|null $product
- * @property-read \App\Models\Purchase|null $purchase
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails query()
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereProductId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails wherePurchaseId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereQuantity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereTotal($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereUnitcost($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PurchaseDetails whereUpdatedAt($value)
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Product|null $product
+ * @property-read Purchase|null $purchase
+ * @method static Builder|PurchaseDetails newModelQuery()
+ * @method static Builder|PurchaseDetails newQuery()
+ * @method static Builder|PurchaseDetails query()
+ * @method static Builder|PurchaseDetails whereCreatedAt($value)
+ * @method static Builder|PurchaseDetails whereId($value)
+ * @method static Builder|PurchaseDetails whereProductId($value)
+ * @method static Builder|PurchaseDetails wherePurchaseId($value)
+ * @method static Builder|PurchaseDetails whereQuantity($value)
+ * @method static Builder|PurchaseDetails whereTotal($value)
+ * @method static Builder|PurchaseDetails whereUnitcost($value)
+ * @method static Builder|PurchaseDetails whereUpdatedAt($value)
+ * @property int|null $storage_location_id
+ * @method static Builder|PurchaseDetails whereStorageLocationId($value)
  * @mixin \Eloquent
  */
 class PurchaseDetails extends Model

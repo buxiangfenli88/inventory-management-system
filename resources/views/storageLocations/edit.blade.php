@@ -63,6 +63,17 @@
                             @enderror
                         </div>
 
+                        <!-- Form Group (stock remain) -->
+                        <div class="mb-3">
+                            <label class="small mb-1" for="stock_remain">Số lượng khả dụng<span class="text-danger">*</span></label>
+                            <input class="form-control form-control-solid @error('stock_remain') is-invalid @enderror" id="stock_remain" name="stock_remain" type="text" placeholder="" value="{{ old('stock_remain', $storageLocation->stock_remain) }}" />
+                            @error('stock_remain')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                            @enderror
+                        </div>
+
                         <!-- Submit button -->
                         <button class="btn btn-primary" type="submit">Update</button>
                         <a class="btn btn-danger" href="{{ route('storage-locations.index') }}">Cancel</a>

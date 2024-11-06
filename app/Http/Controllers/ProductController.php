@@ -62,7 +62,7 @@ class ProductController extends Controller
     {
         return view('products.create', [
             'categories' => Category::all(),
-            'storageLocations' => StorageLocation::query()->where('stock_remain', '>', 0)->get(),
+//            'storageLocations' => StorageLocation::query()->where('stock_remain', '>', 0)->get(),
             'units' => Unit::all(),
         ]);
     }
@@ -89,7 +89,7 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'buying_price' => 'nullable|integer',
             'selling_price' => 'nullable|integer',
-            'storage_location_id' => 'required|integer|exists:storage_locations,id',
+//            'storage_location_id' => 'required|integer|exists:storage_locations,id',
         ];
 
         $validatedData = $request->validate($rules);
@@ -97,11 +97,11 @@ class ProductController extends Controller
         // Save product code value
         $validatedData['product_code'] = $validatedData['product_code'] ?? $productCode;
 
-        $storageLocation = StorageLocation::query()->where('id', $validatedData['storage_location_id'])->first();
-        $remain = $storageLocation->getStockRemain();
-        if ((int)$validatedData['stock'] > $remain) {
-            throw ValidationException::withMessages(['stock' => 'Số lượng vượt quá số lượng khả dụng ' . $remain]);
-        }
+//        $storageLocation = StorageLocation::query()->where('id', $validatedData['storage_location_id'])->first();
+//        $remain = $storageLocation->getStockRemain();
+//        if ((int)$validatedData['stock'] > $remain) {
+//            throw ValidationException::withMessages(['stock' => 'Số lượng vượt quá số lượng khả dụng ' . $remain]);
+//        }
 
         /**
          * Handle upload image
@@ -117,11 +117,13 @@ class ProductController extends Controller
             $validatedData['product_image'] = $fileName;
         }
 
-        DB::transaction(function () use ($validatedData, $storageLocation) {
-            Product::create($validatedData);
-            $storageLocation->stock_remain = $storageLocation->getStockRemain();
-            $storageLocation->save();
-        });
+//        DB::transaction(function () use ($validatedData, $storageLocation) {
+//            Product::create($validatedData);
+//            $storageLocation->stock_remain = $storageLocation->getStockRemain();
+//            $storageLocation->save();
+//        });
+
+        Product::create($validatedData);
 
         return Redirect::route('products.index')->with('success', 'Product has been created!');
     }
@@ -150,12 +152,12 @@ class ProductController extends Controller
         return view('products.edit', [
             'categories' => Category::all(),
             'units' => Unit::all(),
-            'storageLocations' => StorageLocation::query()
-                ->where(function ($query) use ($product) {
-                    $query->where('stock_remain', '>', 0);
-                    $query->orWhere('id', $product->storage_location_id);
-                })
-                ->get(),
+//            'storageLocations' => StorageLocation::query()
+//                ->where(function ($query) use ($product) {
+//                    $query->where('stock_remain', '>', 0);
+//                    $query->orWhere('id', $product->storage_location_id);
+//                })
+//                ->get(),
             'product' => $product,
         ]);
     }
@@ -175,7 +177,7 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'buying_price' => 'nullable|integer',
             'selling_price' => 'nullable|integer',
-            'storage_location_id' => 'required|integer|exists:storage_locations,id',
+//            'storage_location_id' => 'required|integer|exists:storage_locations,id',
         ];
 
         $validatedData = $request->validate($rules);
@@ -201,24 +203,26 @@ class ProductController extends Controller
             $validatedData['product_image'] = $fileName;
         }
 
-        $storageLocation = StorageLocation::query()->where('id', $validatedData['storage_location_id'])->first();
-        $remain = $storageLocation->getStockRemain($product->id);
-        if ((int)$validatedData['stock'] > $remain) {
-            throw ValidationException::withMessages(['stock' => 'Số lượng vượt quá số lượng khả dụng ' . $remain]);
-        }
+//        $storageLocation = StorageLocation::query()->where('id', $validatedData['storage_location_id'])->first();
+//        $remain = $storageLocation->getStockRemain($product->id);
+//        if ((int)$validatedData['stock'] > $remain) {
+//            throw ValidationException::withMessages(['stock' => 'Số lượng vượt quá số lượng khả dụng ' . $remain]);
+//        }
 
-        DB::transaction(function () use ($product, $validatedData, $storageLocation) {
-            Product::where('id', $product->id)->update($validatedData);
-            // restore old location
-            /* @var StorageLocation $oldStorageLocation */
-            if ((int)$validatedData['storage_location_id'] !== $product->storage_location_id && $oldStorageLocation = StorageLocation::find($product->storage_location_id)) {
-                $oldStorageLocation->stock_remain = $oldStorageLocation->getStockRemain();
-                $oldStorageLocation->save();
-            }
+//        DB::transaction(function () use ($product, $validatedData, $storageLocation) {
+//            Product::where('id', $product->id)->update($validatedData);
+//            // restore old location
+//            /* @var StorageLocation $oldStorageLocation */
+//            if ((int)$validatedData['storage_location_id'] !== $product->storage_location_id && $oldStorageLocation = StorageLocation::find($product->storage_location_id)) {
+//                $oldStorageLocation->stock_remain = $oldStorageLocation->getStockRemain();
+//                $oldStorageLocation->save();
+//            }
+//
+//            $storageLocation->stock_remain = $storageLocation->getStockRemain();
+//            $storageLocation->save();
+//        });
 
-            $storageLocation->stock_remain = $storageLocation->getStockRemain();
-            $storageLocation->save();
-        });
+        Product::where('id', $product->id)->update($validatedData);
 
         return Redirect::route('products.index')->with('success', 'Product has been updated!');
     }

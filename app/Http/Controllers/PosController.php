@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Customer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,9 @@ class PosController extends Controller
         }
 
         $products = Product::with(['category', 'unit'])
+                ->join('product_storage_locations', 'product_storage_locations.product_id', '=', 'products.id')
+                ->select('products.*')
+                ->addSelect(DB::raw('product_storage_locations.quantity as stock_available'))
                 ->filter(request(['search']))
                 ->sortable()
                 ->paginate($row)
