@@ -21,6 +21,15 @@
 <!-- BEGIN: Main Page Content -->
 <div class="container-xl px-4">
     <div class="row">
+        @error('invalidStock')
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header text-danger">
+                    {!! $message !!}
+                </div>
+            </div>
+        </div>
+        @enderror
 
         <!-- BEGIN: Information Customer -->
         <div class="col-xl-12">
@@ -127,7 +136,7 @@
         <!-- BEGIN: Table Product -->
         <div class="col-xl-12">
             <div class="card mb-4 mb-xl-0">
-                <div class="card-header">List Product</div>
+                <div class="card-header">Sản phẩm</div>
 
                 <div class="card-body">
                     <!-- BEGIN: Products List -->
@@ -140,6 +149,7 @@
                                         <th scope="col">Photo</th>
                                         <th scope="col">Product Name</th>
                                         <th scope="col">Product Code</th>
+                                        <th scope="col">Vị trí</th>
                                         <th scope="col">Quantity</th>
 {{--                                        <th scope="col">Price</th>--}}
 {{--                                        <th scope="col">Total</th>--}}
@@ -156,6 +166,7 @@
                                         </td>
                                         <td scope="row">{{ $item->product->product_name }}</td>
                                         <td scope="row">{{ $item->product->product_code }}</td>
+                                        <td scope="row">{{ $item->storage_location_name }}</td>
                                         <td scope="row">{{ $item->quantity }}</td>
 {{--                                        <td scope="row">{{ $item->unitcost }}</td>--}}
 {{--                                        <td scope="row">{{ $item->total }}</td>--}}

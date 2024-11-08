@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\OrderDetails;
 use App\Models\Product;
 use App\Models\Customer;
+use App\Models\ProductStorageLocation;
+use App\Models\StorageLocation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Illuminate\Support\Facades\Route;
@@ -21,20 +24,27 @@ class PosController extends Controller
      */
     public function index()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
-        if ($row < 1 || $row > 100) {
-            abort(400, 'The per-page parameter must be an integer between 1 and 100.');
+        if ($row < 1) {
+            abort(400, 'The per-page parameter must be an integer.');
         }
 
         $products = Product::with(['category', 'unit'])
-                ->join('product_storage_locations', 'product_storage_locations.product_id', '=', 'products.id')
-                ->select('products.*')
-                ->addSelect(DB::raw('product_storage_locations.quantity as stock_available'))
-                ->filter(request(['search']))
-                ->sortable()
-                ->paginate($row)
-                ->appends(request()->query());
+            ->join('product_storage_locations', 'product_storage_locations.product_id', '=', 'products.id')
+            ->leftJoin('storage_locations', 'product_storage_locations.storage_location_id', '=', 'storage_locations.id')
+            ->select('products.*')
+            ->addSelect(DB::raw('product_storage_locations.quantity as stock_available'))
+            ->addSelect(['product_storage_locations.id as product_storage_location_id'])
+            ->addSelect(['storage_locations.name as storage_location_name'])
+            ->filter(request(['search']))
+            ->when(request('sort'), function ($query, $sort) {
+                $query->orderBy($sort, request('direction', 'desc'));
+            })
+            ->where('product_storage_locations.quantity', '>', 0)
+            ->where('products.stock', '>', 0)
+            ->paginate($row)
+            ->appends(request()->query());
 
         $customers = Customer::all()->sortBy('name');
 
@@ -53,18 +63,26 @@ class PosController extends Controller
     public function addCartItem(Request $request)
     {
         $rules = [
-            'id' => 'required|numeric',
+            'id' => 'required|numeric|exists:product_storage_locations,id',
             'name' => 'required|string',
             'price' => 'nullable|numeric',
         ];
 
         $validatedData = $request->validate($rules);
 
+        /* @var ProductStorageLocation $productStorageLocation */
+        $productStorageLocation = ProductStorageLocation::findOrFail($validatedData['id']);
+        /* @var StorageLocation $storageLocation */
+        $storageLocation = StorageLocation::findOrFail($productStorageLocation->storage_location_id);
+
         Cart::add([
-            'id' => $validatedData['id'],
+            'id' => $validatedData['id'], // this is product_storage_locations.id
             'name' => $validatedData['name'],
             'qty' => 1,
-            'price' => $validatedData['price'] ?? 0
+            'price' => $validatedData['price'] ?? 0,
+            'options' => [
+                'storage_location_name' => $storageLocation->name,
+            ],
         ]);
 
         return Redirect::back()->with('success', 'Product has been added to cart!');
@@ -89,7 +107,7 @@ class PosController extends Controller
     /**
      * Handle delete product from cart.
      */
-    public function deleteCartItem(String $rowId)
+    public function deleteCartItem(string $rowId)
     {
         Cart::remove($rowId);
 
@@ -103,24 +121,31 @@ class PosController extends Controller
     public function createInvoice(Request $request)
     {
         $rules = [
-            'customer_id' => 'required|string'
+            'customer_id' => 'required|string',
         ];
 
         $validatedData = $request->validate($rules);
         $customer = Customer::where('id', $validatedData['customer_id'])->first();
 
-        $contents = Cart::content();
+        $carts = Cart::content();
 
-        foreach ($contents as $content) {
-            $product = Product::findOrFail($content->id);
-            if ($content->qty > $product->stock) {
-                throw ValidationException::withMessages(['invalidStock' => $product->product_name . ' vượt quá số lượng khả dụng'])->redirectTo(Redirect::back()->getTargetUrl());
+        foreach ($carts as $cartItem) {
+            /* @var ProductStorageLocation $productStorageLocation */
+            $productStorageLocation = ProductStorageLocation::findOrFail($cartItem->id);
+            if ($cartItem->qty > $productStorageLocation->quantity) {
+                throw ValidationException::withMessages(
+                    [
+                        'invalidStock' => '<strong>' . $cartItem->name . '</strong>'
+                            . ' vượt quá số lượng khả dụng ở vị trí '
+                            . '<strong>' . $cartItem->options['storage_location_name'] . '</strong>',
+                    ]
+                )->redirectTo(Redirect::back()->getTargetUrl());
             }
         }
 
         return view('pos.create', [
             'customer' => $customer,
-            'carts' => $contents
+            'carts' => $carts,
         ]);
     }
 }

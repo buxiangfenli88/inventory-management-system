@@ -2,30 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
+use App\Models\ProductStorageLocation;
 use App\Models\User;
+use App\Services\StorageLocationService;
 use Carbon\Carbon;
 use App\Models\Order;
-use App\Models\Product;
 use App\Models\OrderDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
+    protected $storageLocationService;
+
+    public function __construct(StorageLocationService $storageLocationService)
+    {
+        $this->storageLocationService = $storageLocationService;
+    }
+
     /**
      * Display a pending orders.
      */
     public function pendingOrders()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
-        if ($row < 1 || $row > 100) {
-            abort(400, 'The per-page parameter must be an integer between 1 and 100.');
+        if ($row < 1) {
+            abort(400, 'The per-page parameter must be an integer.');
         }
 
         $orders = Order::where('order_status', 'pending')
@@ -45,7 +53,7 @@ class OrderController extends Controller
      */
     public function completeOrders(Request $request)
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
         if ($row < 1 || $row > 100) {
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
@@ -68,7 +76,7 @@ class OrderController extends Controller
 
     public function dueOrders()
     {
-        $row = (int) request('row', 10);
+        $row = (int)request('row', 10);
 
         if ($row < 1 || $row > 100) {
             abort(400, 'The per-page parameter must be an integer between 1 and 100.');
@@ -89,7 +97,7 @@ class OrderController extends Controller
     /**
      * Display an order details.
      */
-    public function dueOrderDetails(String $order_id)
+    public function dueOrderDetails(string $order_id)
     {
         $order = Order::where('id', $order_id)->roleFilter(auth()->user())->first();
         $orderDetails = OrderDetails::with('product')
@@ -106,7 +114,7 @@ class OrderController extends Controller
     /**
      * Display an order details.
      */
-    public function orderDetails(String $order_id)
+    public function orderDetails(string $order_id)
     {
         $order = Order::where('id', $order_id)->roleFilter(auth()->user())->firstOrFail();
         $orderDetails = OrderDetails::with('product')
@@ -155,21 +163,29 @@ class OrderController extends Controller
             $order_id = Order::insertGetId($validatedData);
 
             // Create Order Details
-            $contents = Cart::content();
+            $carts = Cart::content();
             $oDetails = array();
 
-            foreach ($contents as $content) {
-                $product = Product::findOrFail($content->id);
-                if ($content->qty > $product->stock) {
-                    throw ValidationException::withMessages(['invalidStock' => $product->product_name . ' vượt quá số lượng khả dụng'])
-                        ->redirectTo(route('pos.index'));
+            foreach ($carts as $cartItem) {
+                /* @var ProductStorageLocation $productStorageLocation */
+                $productStorageLocation = ProductStorageLocation::findOrFail($cartItem->id);
+                if ($cartItem->qty > $productStorageLocation->quantity) {
+                    throw ValidationException::withMessages(
+                        [
+                            'invalidStock' => '<strong>' . $cartItem->name . '</strong>'
+                                . ' vượt quá số lượng khả dụng ở vị trí '
+                                . '<strong>' . $cartItem->options['storage_location_name'] . '</strong>',
+                        ]
+                    )->redirectTo(Redirect::back()->getTargetUrl());
                 }
 
                 $oDetails['order_id'] = $order_id;
-                $oDetails['product_id'] = $content->id;
-                $oDetails['quantity'] = $content->qty;
-                $oDetails['unitcost'] = $content->price;
-                $oDetails['total'] = $content->subtotal;
+                $oDetails['product_id'] = $productStorageLocation->product_id;
+                $oDetails['storage_location_id'] = $productStorageLocation->storage_location_id;
+                $oDetails['storage_location_name'] = $productStorageLocation->storageLocation->name ?? null;
+                $oDetails['quantity'] = $cartItem->qty;
+                $oDetails['unitcost'] = $cartItem->price;
+                $oDetails['total'] = $cartItem->subtotal;
                 $oDetails['created_at'] = Carbon::now();
 
                 OrderDetails::insert($oDetails);
@@ -187,17 +203,43 @@ class OrderController extends Controller
      */
     public function updateOrder(Request $request)
     {
-        $order_id = $request->id;
+        $orderId = $request->id;
+        /* @var Order $order */
+        $order = Order::findOrFail($orderId);
 
-        // Reduce the stock
-        $products = OrderDetails::where('order_id', $order_id)->get();
+        DB::transaction(function () use ($order, $orderId) {
+            /* @var OrderDetails $orderDetail */
+            foreach ($order->orderDetails as $orderDetail) {
 
-        foreach ($products as $product) {
-            Product::where('id', $product->product_id)
-                    ->update(['stock' => DB::raw('stock-'.$product->quantity)]);
-        }
+                /* @var ProductStorageLocation $productStorageLocation */
+                $productStorageLocation = ProductStorageLocation::query()
+                    ->where('product_id', $orderDetail->product_id)
+                    ->where('storage_location_id', $orderDetail->storage_location_id)
+                    ->first();
+                if ($orderDetail->quantity > $productStorageLocation->quantity) {
+                    throw ValidationException::withMessages(
+                        [
+                            'invalidStock' => '<strong>' . $orderDetail->product->product_name . '</strong>'
+                                . ' vượt quá số lượng khả dụng ở vị trí '
+                                . '<strong>' . $orderDetail->storage_location_name . '</strong>',
+                        ]
+                    )->redirectTo(Redirect::back()->getTargetUrl());
+                }
 
-        Order::findOrFail($order_id)->update(['order_status' => 'complete']);
+                Product::query()
+                    ->where('id', $orderDetail->product_id)
+                    ->decrement('stock', $orderDetail->quantity);
+
+                // update storage location when export product
+                $this->storageLocationService->exportStorageLocation(
+                    $orderDetail->product_id,
+                    $orderDetail->storage_location_id,
+                    $orderDetail->quantity,
+                );
+            }
+
+            Order::findOrFail($orderId)->update(['order_status' => 'complete']);
+        });
 
         return Redirect::route('order.completeOrders')->with('success', 'Order has been completed!');
     }
@@ -232,13 +274,13 @@ class OrderController extends Controller
     /**
      * Handle to print an invoice.
      */
-    public function downloadInvoice(Int $order_id)
+    public function downloadInvoice(int $order_id)
     {
         $order = Order::with('customer')->where('id', $order_id)->first();
         $orderDetails = OrderDetails::with('product')
-                        ->where('order_id', $order_id)
-                        ->orderBy('id', 'DESC')
-                        ->get();
+            ->where('order_id', $order_id)
+            ->orderBy('id', 'DESC')
+            ->get();
 
         return view('orders.print-invoice', [
             'order' => $order,
@@ -268,7 +310,7 @@ class OrderController extends Controller
         $purchases = $orders = Order::query()
             ->where('order_status', 'complete')
             ->roleFilter($user)
-            ->whereBetween('orders.order_date',[$sDate,$eDate])
+            ->whereBetween('orders.order_date', [$sDate, $eDate])
             ->filter(request(['search']))
             ->sortable()
             ->appends(request()->query())
@@ -286,8 +328,7 @@ class OrderController extends Controller
 //            'Total',
         );
 
-        foreach($purchases as $purchase)
-        {
+        foreach ($purchases as $purchase) {
             $purchase_array[] = array(
                 'Date' => $purchase->purchase_date,
                 'No Purchase' => $purchase->purchase_no,

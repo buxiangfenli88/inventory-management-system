@@ -63,7 +63,7 @@
                         <div class="card-title">
                             @error('invalidStock')
                             <div class="text-danger">
-                                {{ $message }}
+                                {!! $message !!}
                             </div>
                             @enderror
                         </div>
@@ -76,6 +76,7 @@
                                     <th scope="col">QTY</th>
                                     {{--                                    <th scope="col">Price</th>--}}
                                     {{--                                    <th scope="col">SubTotal</th>--}}
+                                    <th scope="col">Vị trí</th>
                                     <th scope="col">Action</th>
                                 </tr>
                                 </thead>
@@ -101,6 +102,7 @@
                                         </td>
                                         {{--                                    <td>{{ $item->price }}</td>--}}
                                         {{--                                    <td>{{ $item->subtotal }}</td>--}}
+                                        <td>{{ $item->options['storage_location_name'] ?? '' }}</td>
                                         <td>
                                             <div class="d-flex">
                                                 <form action="{{ route('pos.deleteCartItem', $item->rowId) }}"
@@ -247,8 +249,9 @@
                                     <thead class="thead-light">
                                     <tr>
                                         <th scope="col">No.</th>
-                                        <th scope="col">@sortablelink('product_name', 'Name')</th>
-                                        <th scope="col">@sortablelink('stock')</th>
+                                        <th scope="col">@sortablelink('product_name', 'Tên sản phẩm')</th>
+                                        <th scope="col">@sortablelink('stock', 'Số lượng')</th>
+                                        <th scope="col">@sortablelink('storage_location_name', 'Vị trí')</th>
                                         {{--                                        <th scope="col">@sortablelink('unit.name', 'unit')</th>--}}
                                         {{--                                        <th scope="col">@sortablelink('selling_price', 'Price')</th>--}}
                                         <th scope="col">Action</th>
@@ -265,14 +268,15 @@
                                             </td> --}}
                                             <td>{{ $product->product_name }}</td>
                                             <td>{{ $product->stock_available }}</td>
+                                            <td>{{ $product->storage_location_name }}</td>
                                             {{--                                        <td>{{ $product->unit->name }}</td>--}}
                                             {{--                                        <td>{{ $product->selling_price }}</td>--}}
                                             <td>
                                                 <div class="d-flex">
-                                                    <form action="{{ route('pos.addCartItem', $product->id) }}"
+                                                    <form action="{{ route('pos.addCartItem', $product->product_storage_location_id) }}"
                                                           method="POST">
                                                         @csrf
-                                                        <input type="hidden" name="id" value="{{ $product->id }}">
+                                                        <input type="hidden" name="id" value="{{ $product->product_storage_location_id }}">
                                                         <input type="hidden" name="name"
                                                                value="{{ $product->product_name }}">
                                                         <input type="hidden" name="price"

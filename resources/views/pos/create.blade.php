@@ -57,18 +57,18 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-6 mb-50">
-                                <h4 class="inv-title-1">Customer</h4>
+                                <h4 class="inv-title-1">Người nhận hàng</h4>
                                 <p class="inv-from-1">{{ $customer->name }}</p>
                                 <p class="inv-from-1">{{ $customer->phone }}</p>
                                 <p class="inv-from-1">{{ $customer->email }}</p>
                                 <p class="inv-from-2">{{ $customer->address }}</p>
                             </div>
                             <div class="col-sm-6 text-end mb-50">
-                                <h4 class="inv-title-1">Store</h4>
-                                <p class="inv-from-1">Name Store</p>
-                                <p class="inv-from-1">(+62) 123 123 123</p>
-                                <p class="inv-from-1">email@example.com</p>
-                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>
+{{--                                <h4 class="inv-title-1">Store</h4>--}}
+{{--                                <p class="inv-from-1">Name Store</p>--}}
+{{--                                <p class="inv-from-1">(+62) 123 123 123</p>--}}
+{{--                                <p class="inv-from-1">email@example.com</p>--}}
+{{--                                <p class="inv-from-2">Cirebon, Jawa Barat, Indonesia</p>--}}
                             </div>
                         </div>
                     </div>
@@ -77,10 +77,11 @@
                             <table class="default-table invoice-table">
                                 <thead>
                                 <tr>
-                                    <th>Item</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Subtotal</th>
+                                    <th>Sản phẩm</th>
+{{--                                    <th>Price</th>--}}
+                                    <th>Số lượng</th>
+{{--                                    <th>Subtotal</th>--}}
+                                    <th>Vị trí</th>
                                 </tr>
                                 </thead>
 
@@ -88,24 +89,25 @@
                                 @foreach ($carts as $item)
                                 <tr>
                                     <td>{{ $item->name }}</td>
-                                    <td>{{ $item->price }}</td>
+{{--                                    <td>{{ $item->price }}</td>--}}
                                     <td>{{ $item->qty }}</td>
-                                    <td>{{ $item->subtotal }}</td>
+{{--                                    <td>{{ $item->subtotal }}</td>--}}
+                                    <td>{{ $item->options['storage_location_name'] }}</td>
                                 </tr>
                                 @endforeach
 
-                                <tr>
-                                    <td colspan="3"><strong>Subtotal</strong></td>
-                                    <td><strong>{{ Cart::subtotal() }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3"><strong>Tax</strong></td>
-                                    <td><strong>{{ Cart::tax() }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td colspan="3"><strong>Total</strong></td>
-                                    <td><strong>{{ Cart::total() }}</strong></td>
-                                </tr>
+{{--                                <tr>--}}
+{{--                                    <td colspan="2"><strong>Subtotal</strong></td>--}}
+{{--                                    <td><strong>{{ Cart::subtotal() }}</strong></td>--}}
+{{--                                </tr>--}}
+{{--                                <tr>--}}
+{{--                                    <td colspan="2"><strong>Tax</strong></td>--}}
+{{--                                    <td><strong>{{ Cart::tax() }}</strong></td>--}}
+{{--                                </tr>--}}
+{{--                                <tr>--}}
+{{--                                    <td colspan="2"><strong>Total</strong></td>--}}
+{{--                                    <td><strong>{{ Cart::total() }}</strong></td>--}}
+{{--                                </tr>--}}
                                 </tbody>
                             </table>
                         </div>

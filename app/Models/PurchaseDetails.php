@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -20,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read Product|null $product
  * @property-read Purchase|null $purchase
+ * @property-read StorageLocation $storageLocation
  * @method static Builder|PurchaseDetails newModelQuery()
  * @method static Builder|PurchaseDetails newQuery()
  * @method static Builder|PurchaseDetails query()
@@ -38,6 +40,7 @@ use Illuminate\Support\Carbon;
 class PurchaseDetails extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'purchase_id',
         'product_id',
@@ -60,5 +63,10 @@ class PurchaseDetails extends Model
     public function purchase()
     {
         return $this->belongsTo(Purchase::class, 'purchase_id', 'id');
+    }
+
+    public function storageLocation(): BelongsTo
+    {
+        return $this->belongsTo(StorageLocation::class, 'storage_location_id', 'id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,9 +22,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int $quantity
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read Collection<int, Product> $products
  * @property-read int|null $products_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\StorageLocation> $storageLocations
+ * @property-read Collection<int, StorageLocation> $storageLocations
+ * @property-read StorageLocation $storageLocation
  * @property-read int|null $storage_locations_count
  * @method static Builder|ProductStorageLocation newModelQuery()
  * @method static Builder|ProductStorageLocation newQuery()
@@ -64,5 +66,10 @@ class ProductStorageLocation extends Model
     {
         return $this->belongsToMany(StorageLocation::class, 'product_storage_location')
             ->withPivot('quantity');
+    }
+
+    public function storageLocation()
+    {
+        return $this->belongsTo(StorageLocation::class, 'storage_location_id');
     }
 }

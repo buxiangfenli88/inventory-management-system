@@ -2,27 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\ProductStorageLocation;
 use App\Models\StorageLocation;
+use App\Services\StorageLocationService;
 use Exception;
 use Carbon\Carbon;
-use App\Models\Product;
 use App\Models\Category;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-use App\Models\PurcaseDetail;
 use App\Models\PurchaseDetails;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\ValidationException;
-use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Haruncpi\LaravelIdGenerator\IdGenerator;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PurchaseController extends Controller
 {
+    protected $storageLocationService;
+
+    public function __construct(StorageLocationService $storageLocationService)
+    {
+        $this->storageLocationService = $storageLocationService;
+    }
+
     /**
      * Display an all purchases.
      */
@@ -153,17 +159,12 @@ class PurchaseController extends Controller
                         throw ValidationException::withMessages(['errorMessage' => $storageLocation->name . ' không đủ só lượng chứa hàng']);
                     }
 
-                    // update stock remain
-                    $storageLocation->stock_remain -= $pDetails['quantity'];
-                    $storageLocation->save();
-
-                    // update or create product location quantity
-                    $productLocation = ProductStorageLocation::query()->firstOrCreate([
-                        'storage_location_id' => $storageLocation->id,
-                        'product_id' => $pDetails['product_id'],
-                    ]);
-                    $productLocation->quantity += $pDetails['quantity'];
-                    $productLocation->save();
+                    // update storage location when input product
+                    $this->storageLocationService->inputStorageLocation(
+                        $pDetails['product_id'],
+                        $storageLocation->id,
+                        $pDetails['quantity']
+                    );
 
                     PurchaseDetails::insert($pDetails);
                 }
@@ -181,20 +182,22 @@ class PurchaseController extends Controller
     public function updatePurchase(Request $request)
     {
         $purchase_id = $request->id;
+        /* @var Purchase $purchase */
+        $purchase = Purchase::findOrFail($purchase_id);
 
-        // after purchase approved, add stock product
-        $products = PurchaseDetails::where('purchase_id', $purchase_id)->get();
+        DB::transaction(function () use ($purchase) {
+            foreach ($purchase->purchaseDetails as $purchaseDetail) {
+                Product::query()
+                    ->where('id', $purchaseDetail->product_id)
+                    ->increment('stock', $purchaseDetail->quantity);
+            }
 
-        foreach ($products as $product) {
-            Product::where('id', $product->product_id)
-                ->update(['stock' => DB::raw('stock+' . $product->quantity)]);
-        }
-
-        Purchase::findOrFail($purchase_id)
-            ->update([
-                'purchase_status' => 1,
-                'updated_by' => auth()->user()->id,
-            ]); // 1 = approved, 0 = pending
+            Purchase::findOrFail($purchase->id)
+                ->update([
+                    'purchase_status' => 1,
+                    'updated_by' => auth()->user()->id,
+                ]); // 1 = approved, 0 = pending
+        });
 
         return Redirect::route('purchases.allPurchases')->with('success', 'Purchase has been approved!');
     }

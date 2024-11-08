@@ -6,6 +6,8 @@ use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Kyslik\ColumnSortable\Sortable;
 
 /**
@@ -28,12 +30,13 @@ use Kyslik\ColumnSortable\Sortable;
  * @property int|null $created_by
  * @property string|null $note
  * @property-read \App\Models\Customer|null $customer
- * @property-read \App\Models\User|null $user_created
+ * @property-read User|null $user_created
+ * @property-read Collection<OrderDetails> $orderDetails
  * @method static Builder|Order filter(array $filters)
  * @method static Builder|Order newModelQuery()
  * @method static Builder|Order newQuery()
  * @method static Builder|Order query()
- * @method static Builder|Order roleFilter(\App\Models\User $user)
+ * @method static Builder|Order roleFilter(User $user)
  * @method static Builder|Order sortable($defaultParameters = null)
  * @method static Builder|Order whereCreatedAt($value)
  * @method static Builder|Order whereCreatedBy($value)
@@ -51,6 +54,7 @@ use Kyslik\ColumnSortable\Sortable;
  * @method static Builder|Order whereTotalProducts($value)
  * @method static Builder|Order whereUpdatedAt($value)
  * @method static Builder|Order whereVat($value)
+ * @property-read int|null $order_details_count
  * @mixin \Eloquent
  */
 class Order extends Model
@@ -90,6 +94,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+
+    public function orderDetails(): HasMany
+    {
+        return $this->hasMany(OrderDetails::class, 'order_id', 'id');
     }
 
     public function user_created()

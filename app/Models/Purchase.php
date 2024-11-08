@@ -3,8 +3,13 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Kyslik\ColumnSortable\Sortable;
 
 /**
@@ -18,30 +23,31 @@ use Kyslik\ColumnSortable\Sortable;
  * @property int $total_amount
  * @property string $created_by
  * @property string|null $updated_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $note
- * @property-read \App\Models\Supplier|null $supplier
- * @property-read \App\Models\User|null $user_created
- * @property-read \App\Models\User|null $user_updated
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase filter(array $filters)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase query()
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase roleFilter(\App\Models\User $user)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase sortable($defaultParameters = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereNote($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase wherePurchaseDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase wherePurchaseNo($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase wherePurchaseStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereSupplierId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereTotalAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Purchase whereUpdatedBy($value)
- * @mixin \Eloquent
+ * @property-read Supplier|null $supplier
+ * @property-read User|null $user_created
+ * @property-read User|null $user_updated
+ * @property-read Collection<PurchaseDetails> $purchaseDetails
+ * @method static Builder|Purchase filter(array $filters)
+ * @method static Builder|Purchase newModelQuery()
+ * @method static Builder|Purchase newQuery()
+ * @method static Builder|Purchase query()
+ * @method static Builder|Purchase roleFilter(User $user)
+ * @method static Builder|Purchase sortable($defaultParameters = null)
+ * @method static Builder|Purchase whereCreatedAt($value)
+ * @method static Builder|Purchase whereCreatedBy($value)
+ * @method static Builder|Purchase whereId($value)
+ * @method static Builder|Purchase whereNote($value)
+ * @method static Builder|Purchase wherePurchaseDate($value)
+ * @method static Builder|Purchase wherePurchaseNo($value)
+ * @method static Builder|Purchase wherePurchaseStatus($value)
+ * @method static Builder|Purchase whereSupplierId($value)
+ * @method static Builder|Purchase whereTotalAmount($value)
+ * @method static Builder|Purchase whereUpdatedAt($value)
+ * @method static Builder|Purchase whereUpdatedBy($value)
+ * @mixin Eloquent
  */
 class Purchase extends Model
 {
@@ -74,6 +80,11 @@ class Purchase extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
+    }
+
+    public function purchaseDetails(): HasMany
+    {
+        return $this->hasMany(PurchaseDetails::class, 'purchase_id', 'id');
     }
 
     public function user_created()
