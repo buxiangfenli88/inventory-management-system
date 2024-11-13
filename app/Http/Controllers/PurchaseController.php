@@ -159,12 +159,12 @@ class PurchaseController extends Controller
                         throw ValidationException::withMessages(['errorMessage' => $storageLocation->name . ' không đủ só lượng chứa hàng']);
                     }
 
-                    // update storage location when input product
-                    $this->storageLocationService->inputStorageLocation(
-                        $pDetails['product_id'],
-                        $storageLocation->id,
-                        $pDetails['quantity']
-                    );
+//                    // update storage location when input product
+//                    $this->storageLocationService->inputStorageLocation(
+//                        $pDetails['product_id'],
+//                        $storageLocation->id,
+//                        $pDetails['quantity']
+//                    );
 
                     PurchaseDetails::insert($pDetails);
                 }
@@ -187,9 +187,30 @@ class PurchaseController extends Controller
 
         DB::transaction(function () use ($purchase) {
             foreach ($purchase->purchaseDetails as $purchaseDetail) {
+
+                /* @var StorageLocation $storageLocation */
+                $storageLocation = StorageLocation::findOrFail($purchaseDetail->storage_location_id);
+
+                if ($purchaseDetail->quantity > $storageLocation->stock_remain) {
+                    throw ValidationException::withMessages(
+                        [
+                            'invalidStock' => '<strong>' . $purchaseDetail->product->product_name . '</strong>'
+                                . ' vượt quá số lượng khả dụng ở vị trí '
+                                . '<strong>' . $purchaseDetail->storageLocation->name . '</strong>',
+                        ]
+                    )->redirectTo(Redirect::back()->getTargetUrl());
+                }
+
                 Product::query()
                     ->where('id', $purchaseDetail->product_id)
                     ->increment('stock', $purchaseDetail->quantity);
+
+                // update storage location when input product
+                $this->storageLocationService->inputStorageLocation(
+                    $purchaseDetail->product_id,
+                    $purchaseDetail->storage_location_id,
+                    $purchaseDetail->quantity
+                );
             }
 
             Purchase::findOrFail($purchase->id)
@@ -205,14 +226,16 @@ class PurchaseController extends Controller
     /**
      * Handle delete a purchase
      */
-    public function deletePurchase(string $purchase_id)
+    public function deletePurchase(string $purchaseId)
     {
-        Purchase::where([
-            'id' => $purchase_id,
-            'purchase_status' => '0',
-        ])->delete();
+        DB::transaction(function () use ($purchaseId) {
+            PurchaseDetails::where('purchase_id', $purchaseId)->delete();
 
-        PurchaseDetails::where('purchase_id', $purchase_id)->delete();
+            Purchase::where([
+                'id' => $purchaseId,
+                'purchase_status' => '0',
+            ])->delete();
+        });
 
         return Redirect::route('purchases.allPurchases')->with('success', 'Purchase has been deleted!');
     }
@@ -270,34 +293,35 @@ class PurchaseController extends Controller
         //     ->join('purchase_details', 'purchases.id', '=', 'purchase_details.purchase_id')
         //     ->get();
 
-        $purchases = DB::table('purchase_details')
-            ->join('products', 'purchase_details.product_id', '=', 'products.id')
-            ->join('purchases', 'purchase_details.purchase_id', '=', 'purchases.id')
+        $purchaseDetails = PurchaseDetails::query()->with(['product', 'purchase', 'storageLocation'])
+            ->join('purchases', 'purchases.id', '=', 'purchase_details.purchase_id')
             ->whereBetween('purchases.purchase_date', [$sDate, $eDate])
             ->where('purchases.purchase_status', '1')
-            ->select('purchases.purchase_no', 'purchases.purchase_date', 'purchases.supplier_id', 'products.product_code', 'products.product_name', 'purchase_details.quantity', 'purchase_details.unitcost', 'purchase_details.total')
             ->get();
 
 
         $purchase_array [] = array(
-            'Date',
+            'Ngày',
             'No Purchase',
-            'Supplier',
+            'Người giao',
             'Product Code',
-            'Product',
-            'Quantity',
+            'Tên sản phẩm',
+            'Số lượng',
+            'Vị trí',
 //            'Unitcost',
 //            'Total',
         );
 
-        foreach ($purchases as $purchase) {
+        /* @var PurchaseDetails $purchaseDetail */
+        foreach ($purchaseDetails as $purchaseDetail) {
             $purchase_array[] = array(
-                'Date' => $purchase->purchase_date,
-                'No Purchase' => $purchase->purchase_no,
-                'Supplier' => $purchase->supplier_id,
-                'Product Code' => $purchase->product_code,
-                'Product' => $purchase->product_name,
-                'Quantity' => $purchase->quantity,
+                'Date' => $purchaseDetail->purchase->purchase_date,
+                'No Purchase' => $purchaseDetail->purchase->purchase_no,
+                'Người giao' => $purchaseDetail->purchase->supplier->name,
+                'Product Code' => $purchaseDetail->product->product_code,
+                'Tên sản phẩm' => $purchaseDetail->product->product_name,
+                'Số lượng' => $purchaseDetail->quantity,
+                'Vị trí' => $purchaseDetail->storageLocation->name,
 //                'Unitcost' => $purchase->unitcost,
 //                'Total' => $purchase->total,
             );

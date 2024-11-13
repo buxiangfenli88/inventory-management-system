@@ -21,6 +21,17 @@
 <!-- BEGIN: Main Page Content -->
 <div class="container-xl px-4">
     <div class="row">
+        @error('invalidStock')
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header text-danger">
+                    {!! $message !!}
+                </div>
+            </div>
+        </div>
+        @enderror
+    </div>
+    <div class="row">
 
         <!-- BEGIN: Information Supplier -->
         <div class="col-xl-12">
