@@ -302,24 +302,24 @@ class ProductController extends Controller
         $product_array [] = array(
             'Product Name',
             'Category Id',
-            'Unit Id',
+//            'Unit Id',
             'Product Code',
             'Stock',
-            'Buying Price',
-            'Selling Price',
-            'Product Image',
+//            'Buying Price',
+//            'Selling Price',
+//            'Product Image',
         );
 
         foreach ($products as $product) {
             $product_array[] = array(
                 'Product Name' => $product->product_name,
-                'Category Id' => $product->category_id,
-                'Unit Id' => $product->unit_id,
+                'Category Id' => $product->category->name,
+//                'Unit Id' => $product->unit_id,
                 'Product Code' => $product->product_code,
                 'Stock' => $product->stock,
-                'Buying Price' => $product->buying_price,
-                'Selling Price' => $product->selling_price,
-                'Product Image' => $product->product_image,
+//                'Buying Price' => $product->buying_price,
+//                'Selling Price' => $product->selling_price,
+//                'Product Image' => $product->product_image,
             );
         }
 
@@ -337,13 +337,13 @@ class ProductController extends Controller
 
         try {
             $spreadSheet = new Spreadsheet();
-            $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
+            $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20)->setAutoSize(true);
             $spreadSheet->getActiveSheet()->fromArray($products);
             $Excel_writer = new Xls($spreadSheet);
             header('Content-Type: application/vnd.ms-excel');
             header('Content-Disposition: attachment;filename="products.xls"');
             header('Cache-Control: max-age=0');
-            ob_end_clean();
+//            ob_end_clean();
             $Excel_writer->save('php://output');
             exit();
         } catch (Exception $e) {
